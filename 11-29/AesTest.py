@@ -1,6 +1,6 @@
 from Crypto.Cipher import AES
 from Crypto import Random
-import os
+import os, binascii
 
 BS = AES.block_size
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
@@ -15,8 +15,8 @@ class AESCipher:
         """
         Sets hex encoded param as a key
         """
-        key = "140b41b22a29beb4061bda66b6747e14" #TODO not so great to have a fixed key !
-        key = os.urandom(32)
+        # key = "140b41b22a29beb4061bda66b6747e14" #TODO not so great to have a fixed key !
+        key = binascii.b2a_hex(os.urandom(16))
         key = key[:32]
         self.key = key.decode("hex")
 
