@@ -1,4 +1,5 @@
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 from Crypto import Random
 
 def keygen():
@@ -8,11 +9,13 @@ def keygen():
 
 def encrypt(string, key):
 	publicKey = key.publickey()
-	enc = publicKey.encrypt(string,32)
+	cipher = PKCS1_OAEP.new(key)
+	enc = cipher.encrypt(string)
 	return enc
 
 def decrypt(string, key):
-	dec = key.decrypt(string)
+	cipher = PKCS1_OAEP.new(key)
+	dec = cipher.decrypt(string)
 	return dec 
 
 
