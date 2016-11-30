@@ -1,22 +1,30 @@
 import Signature
+import RSAWrapper
+import sys
 from Crypto.PublicKey import RSA
 
 def main():
-	message = "Hello World - Iceland is great!!!"
+
+	message = 'A'
 
 	print "Message: " + message
 
 	key = RSAWrapper.keygen()
 
-	print "Key: " + str(key)
+	print "Key: " 
+	print key
 
-	signature = Signature.sign(message, key)
+	# make public key private and private key public
+	newPrivKey = RSA.construct((key.n, key.d, key.e))
+	newPubKey = newPrivKey.publickey()
+
+	signature = Signature.sign(str(message), key)
 
 	print "Signature: " + str(signature)
 
-	result = Signature.verify(encMessage, key)
+	result = Signature.verify(message, signature, key.publickey())
 
-	print "Result of Verification: " + result
+	print "Result of Verification: " + str(result)
 
 	return
 
