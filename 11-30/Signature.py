@@ -8,7 +8,7 @@ def sign(message, key):
 	
 
 def verify(message, signature, key):
-	sMessage = RSAWrapper.decrypt(message, key)
+	sMessage = RSAWrapper.decrypt(signature, key)
 	if (message == sMessage):
 		return True
 	else:
