@@ -1,4 +1,5 @@
 import RSAWrapper
+from Crypto.PublicKey import RSA
 
 def main():
 	message = "Hello World - Iceland is great!!!"

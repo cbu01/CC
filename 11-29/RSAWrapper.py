@@ -8,7 +8,7 @@ def keygen():
 	return key
 
 def encrypt(string, key):
-	cipher = PKCS1_OAEP.new(publicKey)
+	cipher = PKCS1_OAEP.new(key)
 	enc = cipher.encrypt(string)
 	return enc
 
