@@ -9,13 +9,11 @@ def keygen():
 
 def encrypt(string, key):
 	publicKey = key.publickey()
-	cipher = PKCS1_OAEP.new(key)
+	cipher = PKCS1_OAEP.new(publicKey)
 	enc = cipher.encrypt(string)
 	return enc
 
 def decrypt(string, key):
-	cipher = PKCS1_OAEP.new(key)
-	dec = cipher.decrypt(string)
-	return dec 
-
-
+	ciper = PKCS1_OAEP.new(key)
+	dec = ciper.decrypt(string)
+	return dec
