@@ -1,4 +1,4 @@
-from RSAWrapper import *
+import RSAWrapper
 from Crypto.PublicKey import RSA
 
 def sign(message, key):
@@ -10,9 +10,9 @@ def sign(message, key):
 def verify(message, signature, key):
 	sMessage = RSAWrapper.decrypt(message, key)
 	if (message == sMessage):
-		return true
+		return True
 	else:
-		return false
+		return False
 
 
 
