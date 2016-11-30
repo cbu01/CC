@@ -8,7 +8,6 @@ def sign(message, key):
 	
 
 def verify(message, signature, key):
-	vKey = __turnAroundKey(key)
 	sMessage = RSAWrapper.decrypt(message, key)
 	if (message == sMessage):
 		return true
