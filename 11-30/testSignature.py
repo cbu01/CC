@@ -14,10 +14,6 @@ def main():
 	print "Key: " 
 	print key
 
-	# make public key private and private key public
-	newPrivKey = RSA.construct((key.n, key.d, key.e))
-	newPubKey = newPrivKey.publickey()
-
 	signature = Signature.sign(str(message), key)
 
 	print "Signature: " + str(signature)
