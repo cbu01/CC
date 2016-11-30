@@ -7,8 +7,8 @@ def keygen():
 	key = RSA.generate(1024, keygenerator)
 	return key
 
-def encrypt(string, publickey):
-	cipher = PKCS1_OAEP.new(publicKey)
+def encrypt(string, key):
+	cipher = PKCS1_OAEP.new(key)
 	enc = cipher.encrypt(string)
 	return enc
 
