@@ -9,7 +9,8 @@ def main():
 
 	print "Key: " + str(key)
 
-	encMessage = RSAWrapper.encrypt(message, key)
+	publicKey = key.publickey()
+	encMessage = RSAWrapper.encrypt(message, publicKey)
 
 	print "Encrypted Message: " + str(encMessage)
 
