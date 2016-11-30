@@ -8,11 +8,11 @@ def keygen():
 	return key
 
 def encrypt(string, key):
-	cipher = PKCS1_OAEP.new(key)
-	enc = cipher.encrypt(string)
+	#cipher = PKCS1_OAEP.new(key)
+	enc = key.encrypt(string,32)
 	return enc
 
 def decrypt(string, key):
-	ciper = PKCS1_OAEP.new(key)
-	dec = ciper.decrypt(string)
+	#cipher = PKCS1_OAEP.new(key)
+	dec = key.decrypt(string)
 	return dec
