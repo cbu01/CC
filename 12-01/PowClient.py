@@ -1,6 +1,4 @@
 import PowUdp, PowHelper
-import time
-import sys
 
 
 class PowClient:
@@ -11,23 +9,10 @@ class PowClient:
 
     def run(self):
         print "Running PowClient"
-        try:
-            udp_connection_successful = self._register_client()
-            while udp_connection_successful is None:
-                print "Unable to connect to reflection server. Retrying ..."
-                time.sleep(5)
-                udp_connection_successful = self._register_client()
-        except Exception as ex:
-            print "Failed to connect with reflection server. Reason is " + ex.message
-            sys.exit()
         while True:
             print "Waiting for work from server ..."
             if self._check_for_work():
                 self._do_work()
-
-    def _register_client(self):
-        """ Registers the server as a udp client. Returns the udp connection """
-        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_REGISTER_SERVER)
 
     def _check_for_work(self):
         command, data = PowUdp.udp_receive(self.reflection_ip, self.reflection_port)

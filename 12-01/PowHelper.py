@@ -5,11 +5,8 @@ import binascii
 
 CMD_TASK_SUCCESS_REPLY = "CMD_TASK_SUCCESS_REPLY"
 CMD_TASK_SUCCESS_REQUEST = "CMD_TASK_SUCCESS_REQUEST"
-CMD_REGISTER_SERVER = "CMD_REGISTER_SERVER"
-CMD_REGISTER_CLIENT = "CMD_REGISTER_CLIENT"
 CMD_SEND_TASK_TO_WORKER = "CMD_SEND_TASK_TO_WORKER"
 CMD_RECEIVE_WORK_FROM_WORKER = "CMD_RECEIVE_WORK_FROM_WORKER"
-
 
 
 def generate_random_bit_string(size):
@@ -37,14 +34,9 @@ def verify_hash(s, x, n):
     h = hashlib.sha256()
     s_in_ascii = _binary_to_ascii(s)
     x_in_ascii = _binary_to_ascii(x)
-
-    len_s = len(s_in_ascii)
-    len_x = len(x_in_ascii)
     h.update(s_in_ascii + x_in_ascii)
     digest = h.digest()
-    len_digest = len(digest)
     binary_val = _binary_from_digest(digest)
-    len_binary = len(binary_val)
     enough_zeros = _check_if_enough_zeros(binary_val, n)
     return enough_zeros
 

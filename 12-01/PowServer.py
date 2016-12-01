@@ -1,5 +1,3 @@
-import sys
-import time
 import PowHelper
 import PowUdp
 
@@ -9,13 +7,9 @@ class PowServer:
         self.reflection_ip = reflection_ip
         self.reflection_port = reflection_port
 
-    def _register_server(self):
-        """ Registers the server as a udp client. Returns the udp connection """
-        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_REGISTER_SERVER)
-
     def _send_task_to_worker(self, s, n):
-        """ Sends a hashing task to worker. Returns if task sending was successful """
-        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_SEND_TASK_TO_WORKER, (s,n))
+        """ Sends a hashing task to worker  """
+        PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_SEND_TASK_TO_WORKER, (s,n))
 
     def _check_worker_response(self, s, n, x):
         """ Checks the response of a worker. Returns if hashes are verified """
@@ -30,26 +24,13 @@ class PowServer:
 
     def run(self, n):
         print "Running PowServer"
-        try:
-            udp_connection_successful = self._register_server()
-            while udp_connection_successful is None:
-                print "Unable to connect to reflection server. Retrying ..."
-                time.sleep(5)
-                udp_connection_successful = self._register_server()
-        except Exception as ex:
-            print "Failed to connect with reflection server. Reason is " + ex.message
-            sys.exit()
 
-        print "Udp connection established !"
         while True:
             print "Trying to send task to worker ..."
             s = PowHelper.generate_random_bit_string(128)
-            task_sending_done = False
+            self._send_task_to_worker(s, n)
 
-            while not task_sending_done:
-                task_sending_done = self._send_task_to_worker(s, n)
-
-            print format("Succesfully sent a task to worker. Now I wait for a reply from the worker ...")
+            print format("Hopefully some worker got a task. Now I wait for a reply from him ...")
 
             # Wait for reply from udp server
             while True:

@@ -1,5 +1,5 @@
 def udp_send(ip, port, command, data):
-    """ Send the given command and data to the given udp connection. Returns a response from the server """
+    """ Send the given command and data to the given udp connection. """
     # TODO missing udp implementation
     pass
 
