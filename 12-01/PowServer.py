@@ -17,12 +17,19 @@ class PowServer:
         """ Sends a hashing task to worker. Returns if task sending was successful """
         return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_SEND_TASK_TO_WORKER, (s,n))
 
-    def _receive_task_response(self, s, n, x):
-        """ Receive a reply from worker. Respond with True if the work is correct, False otherwise. Returns if successful in replying to worker """
+    def _check_worker_response(self, s, n, x):
+        """ Checks the response of a worker. Returns if hashes are verified """
+        print "Received response from worker"
         hash_verified = PowHelper.verify_hash(s, n, x)
-        return PowUdp.udp_send(self.reflection_ip, self.reflection_port, PowHelper.CMD_TASK_SUCCESS_REPLY, hash_verified)
+        if hash_verified:
+            print "Successfully verified hash calculation from worker"
+        else:
+            print "Hash from worker NOT verified !"
+
+        return hash_verified
 
     def run(self, n):
+        print "Running PowServer"
         try:
             udp_connection_successful = self._register_server()
             while udp_connection_successful is None:
@@ -35,18 +42,20 @@ class PowServer:
 
         print "Udp connection established !"
         while True:
+            print "Trying to send task to worker ..."
             s = PowHelper.generate_random_bit_string(128)
             task_sending_done = False
 
             while not task_sending_done:
                 task_sending_done = self._send_task_to_worker(s, n)
 
-            print format("Succesfully sent a task to worker")
+            print format("Succesfully sent a task to worker. Now I wait for a reply from the worker ...")
 
             # Wait for reply from udp server
             while True:
                 command, data = PowUdp.udp_receive(self.reflection_ip, self.reflection_port)
                 if command == PowHelper.CMD_RECEIVE_WORK_FROM_WORKER:
                     s, x, n = data
-                    self._receive_task_response(s, n, x)
+                    worker_response_checks_out = self._check_worker_response(s, n, x)
+                    PowUdp.udp_send(self.reflection_ip, self.reflection_port, PowHelper.CMD_TASK_SUCCESS_REPLY, worker_response_checks_out)
                     break
