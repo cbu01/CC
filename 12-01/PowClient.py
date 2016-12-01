@@ -27,8 +27,7 @@ class PowClient:
 
     def _register_client(self):
         """ Registers the server as a udp client. Returns the udp connection """
-        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_REGISTER_SERVER, self.listening_port)
-
+        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_REGISTER_SERVER)
 
     def _check_for_work(self):
         command, data = PowUdp.udp_receive(self.reflection_ip, self.reflection_port)
