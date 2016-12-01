@@ -8,11 +8,10 @@ class PowServer:
     def __init__(self, reflection_ip, reflection_port, listening_port):
         self.reflection_ip = reflection_ip
         self.reflection_port = reflection_port
-        self.listening_port = listening_port
 
     def _register_server(self):
         """ Registers the server as a udp client. Returns the udp connection """
-        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_REGISTER_SERVER, self.listening_port)
+        return PowUdp.udp_send(self.reflection_ip , self.reflection_port, PowHelper.CMD_REGISTER_SERVER)
 
     def _send_task_to_worker(self, s, n):
         """ Sends a hashing task to worker. Returns if task sending was successful """

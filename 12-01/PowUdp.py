@@ -8,4 +8,4 @@ def udp_receive(ip, port):
     """" Poll the udp server for message """
     # TODO missing udp implementation
     # return command, data
-    pass
+    return ("", "")
