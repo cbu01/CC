@@ -13,19 +13,20 @@ CMD_RECEIVE_WORK_FROM_WORKER = "CMD_RECEIVE_WORK_FROM_WORKER"
 
 
 def generate_random_bit_string(size):
-    return [random.randint(0,1) for x in range(size)]
+    return ''.join([str(random.randint(0,1)) for x in range(size)])
 
 
-def find_x(s, n):
+def find_x(s, n, printx=False):
     """ Finds an x such that the Sha256(s + x) has n number of last digits as 0 """
     x_counter = 1
     while True:
-        print "X counter: '%s'" % x_counter
+        if printx:
+            print "X counter: '%s'" % x_counter
         x = _binary_string_from_int(x_counter)
 
         enough_zeros = verify_hash(s, x, n)
         if enough_zeros:
-            return x
+            return x, x_counter
 
         x_counter += 1
 

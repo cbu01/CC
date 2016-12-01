@@ -51,7 +51,7 @@ class PowClient:
 
     def _do_work(self):
         s, n = self.data
-        x = PowHelper.find_x(s,n)
+        x, x_int = PowHelper.find_x(s,n)
         print "Found my x !"
         print x
         PowUdp.udp_send(self.reflection_ip, self.reflection_port, PowHelper.CMD_TASK_SUCCESS_REQUEST, (s, x, n))
