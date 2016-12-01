@@ -5,7 +5,7 @@ import PowUdp
 
 
 class PowServer:
-    def __init__(self, reflection_ip, reflection_port, listening_port):
+    def __init__(self, reflection_ip, reflection_port):
         self.reflection_ip = reflection_ip
         self.reflection_port = reflection_port
 
