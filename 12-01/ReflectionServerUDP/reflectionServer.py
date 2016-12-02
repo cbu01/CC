@@ -11,18 +11,21 @@ def reflectionServer(sourcePort, destinationPort):
 	sourceSocket.bind((HOST, sourcePort))
 
 	destinationSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	destinationSocket.bind((HOST, destinationPort))
 
 	while True:
 		recData, addr = sourceSocket.recvfrom(1024) # 1024 is the buffersize
 		
 		data = pickle.loads(recData)
 
-		destADDRESSES = data[0]
-		message = data[1]
+		clientPORT = data[0]
+		destADDRESS = data[1]
+		message = data[2]
 
-		sourceADDRESS = [addr]
+		print "ReflectionServer receives: " + message
+		print "Address: " 
+		print addr
 
-		d = pickle.dumps((sourceADDRESS,message))
+		d = pickle.dumps((clientPORT,addr,message))
 
-		for i in xrange(len(destADDRESSES)):
-			destinationSocket.sendto(d, destADDRESSES[i])
+		destinationSocket.sendto(d, destADDRESS)
