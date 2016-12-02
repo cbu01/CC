@@ -1,8 +1,9 @@
 from PowServer import PowServer
 
-reflection_ip = "100.100.100.100"
-reflection_port = 12345
+own_port = 10001
+reflection_ip = ''
+reflection_port = 10559
 n = 20
 
-server = PowServer(reflection_ip, reflection_port)
+server = PowServer(own_port, reflection_ip, reflection_port)
 server.run(n)
