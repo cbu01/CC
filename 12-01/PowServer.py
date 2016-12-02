@@ -15,7 +15,8 @@ class PowServer:
     def _check_worker_response(self, s, n, x):
         """ Checks the response of a worker. Returns if hashes are verified """
         print "Received response from worker"
-        hash_verified = PowHelper.verify_hash(s, n, x)
+        s_in_ascii = PowHelper.binary_to_ascii(s)
+        hash_verified = PowHelper.verify_hash(s_in_ascii, n, x)
         if hash_verified:
             print "Successfully verified hash calculation from worker"
         else:
