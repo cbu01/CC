@@ -13,8 +13,8 @@ def udp_send(ownport, ip, port, command, data):
     message = pickle.dumps((ownport, (ip, port), (command, data)))
     serverSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     serverSock.bind(('', ownport)) # only necessary because of port forwarding
-    # serverSock.sendto(message, (R_SERVER_IP, R_SERVER_PORT))
-    # print "Send: " + str(command) + " " + str(data)
+    serverSock.sendto(message, (R_SERVER_IP, R_SERVER_PORT))
+    print "Send: " + str(command) + " " + str(data)
 
 
 def udp_receive(ownport):

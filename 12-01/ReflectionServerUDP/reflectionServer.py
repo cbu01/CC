@@ -22,7 +22,7 @@ def reflectionServer(sourcePort, destinationPort):
 		destADDRESS = data[1]
 		message = data[2]
 
-		print "ReflectionServer receives: " + message
+		print "ReflectionServer receives: " + str(message)
 		print "Address: " 
 		print addr
 
