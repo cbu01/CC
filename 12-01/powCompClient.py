@@ -10,11 +10,12 @@ s.connect((SERVER_IP,SERVER_PORT))
 
 bitData = s.recv(17)
 
+s.send(bitData)
+
 print(bitData)
 
-
-
-s.close()
+print(bitData[0:16])
+print(bitData[16])
 
 
 
