@@ -4,7 +4,7 @@ import PowUdp
 
 class PowServer:
     def __init__(self, own_port, client_ip, client_port):
-		self.own_port = own_port
+        self.own_port = own_port
         self.client_ip = client_ip
         self.client_port = client_port
 

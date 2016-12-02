@@ -3,7 +3,7 @@ import PowUdp, PowHelper
 
 class PowClient:
     def __init__(self, own_port, server_ip, server_port):
-		self.own_port = own_port
+        self.own_port = own_port
         self.server_ip = server_ip
         self.server_port = server_port
         self.data = None
