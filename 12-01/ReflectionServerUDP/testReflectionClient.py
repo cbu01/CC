@@ -15,7 +15,7 @@ def testReflectionClient():
 	data = pickle.dumps((CLIENT_PORT, SERVER_ADDRESS, message))
 	
 	serverSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	serverSock.bind((HOST, CLIENT_PORT))
+	serverSock.bind((HOST, CLIENT_PORT)) 
 	serverSock.sendto(data, (R_SERVER_IP, R_SERVER_PORT))
 
 	recdata, addr = serverSock.recvfrom(1024)
