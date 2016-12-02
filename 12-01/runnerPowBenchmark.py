@@ -16,7 +16,8 @@ run_time = end-start
 print "Time of run: {0} sec. Average time of hash is '{1}' sec. X found was '{2}'".format(run_time, run_time/x_int , x_int)
 
 start = timer()
-x_verified = PowHelper.verify_hash(s,x,n)
+s_in_ascii = PowHelper.binary_to_ascii(s)
+x_verified = PowHelper.verify_hash(s_in_ascii,x,n)
 end = timer()
 run_time = end-start
 
