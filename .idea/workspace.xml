@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="266e5200-3395-4ac3-bf69-46c039ee6e95" name="Default" comment="Changing settings to local host">
+    <list default="true" id="266e5200-3395-4ac3-bf69-46c039ee6e95" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/12-01/PowServer.py" afterPath="$PROJECT_DIR$/12-01/PowServer.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/12-01/PowUdp.py" afterPath="$PROJECT_DIR$/12-01/PowUdp.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/12-01/ReflectionServerUDP/reflectionServer.py" afterPath="$PROJECT_DIR$/12-01/ReflectionServerUDP/reflectionServer.py" />
     </list>
     <ignored path="CC.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -18,10 +18,13 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/CC$runnerPowBenchmark.coverage" NAME="runnerPowBenchmark Coverage Results" MODIFIED="1480672019577" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
-    <SUITE FILE_PATH="coverage/Repo$runnerPowServer.coverage" NAME="runnerPowServer Coverage Results" MODIFIED="1480677290645" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
+    <SUITE FILE_PATH="coverage/Repo$PowServer.coverage" NAME="PowServer Coverage Results" MODIFIED="1480678813505" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
+    <SUITE FILE_PATH="coverage/Repo$runnerPowServer.coverage" NAME="runnerPowServer Coverage Results" MODIFIED="1480678891002" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
     <SUITE FILE_PATH="coverage/CC$rsaTest.coverage" NAME="rsaTest Coverage Results" MODIFIED="1480505318511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/11-29" />
-    <SUITE FILE_PATH="coverage/Repo$testReflectionServer.coverage" NAME="testReflectionServer Coverage Results" MODIFIED="1480677283321" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01/ReflectionServerUDP" />
-    <SUITE FILE_PATH="coverage/Repo$runnerPowClient.coverage" NAME="runnerPowClient Coverage Results" MODIFIED="1480677537616" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
+    <SUITE FILE_PATH="coverage/Repo$testReflectionServer.coverage" NAME="testReflectionServer Coverage Results" MODIFIED="1480678886427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01/ReflectionServerUDP" />
+    <SUITE FILE_PATH="coverage/Repo$PowUdp.coverage" NAME="PowUdp Coverage Results" MODIFIED="1480678733522" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
+    <SUITE FILE_PATH="coverage/Repo$reflectionServer.coverage" NAME="reflectionServer Coverage Results" MODIFIED="1480677847585" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01/ReflectionServerUDP" />
+    <SUITE FILE_PATH="coverage/Repo$runnerPowClient.coverage" NAME="runnerPowClient Coverage Results" MODIFIED="1480678888536" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
     <SUITE FILE_PATH="coverage/CC$mannsiHashRunner.coverage" NAME="mannsiHashRunner Coverage Results" MODIFIED="1480523823861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/11-30" />
     <SUITE FILE_PATH="coverage/CC$testSignature.coverage" NAME="testSignature Coverage Results" MODIFIED="1480507247492" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/11-30" />
   </component>
@@ -37,8 +40,8 @@
       <file leaf-file-name="PowServer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/12-01/PowServer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="17" column="23" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+            <state relative-caret-position="151">
+              <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -46,11 +49,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PowUdp.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="PowUdp.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/12-01/PowUdp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="290">
-              <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+            <state relative-caret-position="425">
+              <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -68,11 +71,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PowClient.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="PowClient.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/12-01/PowClient.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+            <state relative-caret-position="306">
+              <caret line="27" column="19" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -81,7 +84,7 @@
       <file leaf-file-name="runnerPowBenchmark.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/12-01/runnerPowBenchmark.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
+            <state relative-caret-position="238">
               <caret line="14" column="20" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
               <folding>
                 <element signature="e#55#71#0" expanded="true" />
@@ -93,9 +96,21 @@
       <file leaf-file-name="runnerPowServer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/12-01/runnerPowServer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="22" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+            <state relative-caret-position="170">
+              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PowHelper.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/12-01/PowHelper.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="203">
+              <caret line="35" column="45" selection-start-line="35" selection-start-column="33" selection-end-line="35" selection-end-column="45" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -106,18 +121,6 @@
             <state relative-caret-position="119">
               <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PowHelper.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/12-01/PowHelper.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -153,12 +156,12 @@
         <option value="$PROJECT_DIR$/12-01/runnerPowBenchmark.py" />
         <option value="$PROJECT_DIR$/12-01/PowHelper.py" />
         <option value="$PROJECT_DIR$/12-01/ReflectionServerUDP/__init__.py" />
-        <option value="$PROJECT_DIR$/12-01/runnerPowServer.py" />
         <option value="$PROJECT_DIR$/12-01/runnerPowClient.py" />
-        <option value="$PROJECT_DIR$/12-01/PowServer.py" />
-        <option value="$PROJECT_DIR$/12-01/PowClient.py" />
         <option value="$PROJECT_DIR$/12-01/ReflectionServerUDP/reflectionServer.py" />
+        <option value="$PROJECT_DIR$/12-01/PowClient.py" />
         <option value="$PROJECT_DIR$/12-01/PowUdp.py" />
+        <option value="$PROJECT_DIR$/12-01/PowServer.py" />
+        <option value="$PROJECT_DIR$/12-01/runnerPowServer.py" />
       </list>
     </option>
   </component>
@@ -169,8 +172,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-7" />
-    <option name="width" value="1932" />
+    <option name="x" value="-6" />
+    <option name="width" value="1931" />
     <option name="height" value="1047" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -313,43 +316,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="js-jscs-nodeInterpreter" value="C:\Program Files\nodejs\node.exe" />
   </component>
-  <component name="RunManager" selected="Python.runnerPowClient">
-    <configuration default="false" name="mannsiHashRunner" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/11-30" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="CC" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="C:\Dropbox\HR\Courses\Cryptocurrencies\Repo\CC\11-30\hashRunner.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="runnerPowBenchmark" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/12-01" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="CC" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/12-01/runnerPowBenchmark.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.runnerPowServer">
     <configuration default="false" name="testReflectionServer" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -400,6 +367,42 @@
       <module name="CC" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/12-01/runnerPowClient.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="PowUdp" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/12-01" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="CC" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/12-01/PowUdp.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="PowServer" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/12-01" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="CC" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/12-01/PowServer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -613,19 +616,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.mannsiHashRunner" />
-      <item index="1" class="java.lang.String" itemvalue="Python.runnerPowBenchmark" />
-      <item index="2" class="java.lang.String" itemvalue="Python.testReflectionServer" />
-      <item index="3" class="java.lang.String" itemvalue="Python.runnerPowServer" />
-      <item index="4" class="java.lang.String" itemvalue="Python.runnerPowClient" />
+      <item index="0" class="java.lang.String" itemvalue="Python.testReflectionServer" />
+      <item index="1" class="java.lang.String" itemvalue="Python.runnerPowServer" />
+      <item index="2" class="java.lang.String" itemvalue="Python.runnerPowClient" />
+      <item index="3" class="java.lang.String" itemvalue="Python.PowUdp" />
+      <item index="4" class="java.lang.String" itemvalue="Python.PowServer" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.runnerPowClient" />
-        <item index="1" class="java.lang.String" itemvalue="Python.runnerPowServer" />
+        <item index="0" class="java.lang.String" itemvalue="Python.runnerPowServer" />
+        <item index="1" class="java.lang.String" itemvalue="Python.runnerPowClient" />
         <item index="2" class="java.lang.String" itemvalue="Python.testReflectionServer" />
-        <item index="3" class="java.lang.String" itemvalue="Python.runnerPowBenchmark" />
-        <item index="4" class="java.lang.String" itemvalue="Python.mannsiHashRunner" />
+        <item index="3" class="java.lang.String" itemvalue="Python.PowServer" />
+        <item index="4" class="java.lang.String" itemvalue="Python.PowUdp" />
       </list>
     </recent_temporary>
   </component>
@@ -657,24 +660,31 @@
       <option name="project" value="LOCAL" />
       <updated>1480676771431</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Uncomment out sending to server. Fix string cast error">
+      <created>1480677634804</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1480677634804</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="0" width="1932" height="1047" extended-state="0" />
+    <frame x="-6" y="0" width="1931" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20302714" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20313317" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32977587" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32977587" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3191035" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.40661687" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40661687" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -718,22 +728,11 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Small changes to get things to build. Tabs to spaces etc" />
     <MESSAGE value="Changing settings to local host" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changing settings to local host" />
+    <MESSAGE value="Uncomment out sending to server. Fix string cast error" />
+    <option name="LAST_COMMIT_MESSAGE" value="Uncomment out sending to server. Fix string cast error" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/12-01/PowClient.py</url>
-          <line>18</line>
-          <option name="timeStamp" value="31" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/12-01/PowUdp.py</url>
-          <line>25</line>
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -741,7 +740,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="33" />
+      <option name="time" value="35" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1041,41 +1040,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/12-01/runnerPowBenchmark.py">
+    <entry file="file://$PROJECT_DIR$/12-01/PowUdp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="14" column="20" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
+        <state relative-caret-position="425">
+          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
           <folding>
-            <element signature="e#55#71#0" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/12-01/PowHelper.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+        <state relative-caret-position="203">
+          <caret line="35" column="45" selection-start-line="35" selection-start-column="33" selection-end-line="35" selection-end-column="45" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/12-01/PowServer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="23" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/12-01/runnerPowServer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="22" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1087,11 +1068,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/12-01/PowClient.py">
+    <entry file="file://$PROJECT_DIR$/12-01/runnerPowBenchmark.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
-          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding />
+          <caret line="14" column="20" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
+          <folding>
+            <element signature="e#55#71#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1103,13 +1086,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/12-01/PowUdp.py">
+    <entry file="file://$PROJECT_DIR$/12-01/runnerPowServer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="290">
-          <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+        <state relative-caret-position="170">
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/12-01/PowServer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="151">
+          <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#0#16#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/12-01/PowClient.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="27" column="19" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
+          <folding />
         </state>
       </provider>
     </entry>

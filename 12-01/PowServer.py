@@ -16,7 +16,7 @@ class PowServer:
         """ Checks the response of a worker. Returns if hashes are verified """
         print "Received response from worker"
         s_in_ascii = PowHelper.binary_to_ascii(s)
-        hash_verified = PowHelper.verify_hash(s_in_ascii, n, x)
+        hash_verified = PowHelper.verify_hash(s_in_ascii, x, n)
         if hash_verified:
             print "Successfully verified hash calculation from worker"
         else:
@@ -37,7 +37,7 @@ class PowServer:
             # Wait for reply from udp server
             while True:
                 command, data = PowUdp.udp_receive(self.own_port)
-                if command == PowHelper.CMD_RECEIVE_WORK_FROM_WORKER:
+                if command == PowHelper.CMD_TASK_SUCCESS_REQUEST:
                     s, x, n = data
                     worker_response_checks_out = self._check_worker_response(s, n, x)
                     PowUdp.udp_send(self.own_port, self.client_ip, self.client_port, PowHelper.CMD_TASK_SUCCESS_REPLY, worker_response_checks_out)

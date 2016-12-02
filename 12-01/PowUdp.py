@@ -31,4 +31,4 @@ def udp_receive(ownport):
     msg = data[2][1]
 	
     print "Received: " + str(com) + " " + str(msg)
-    return data
+    return (com, msg)
