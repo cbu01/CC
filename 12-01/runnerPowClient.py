@@ -1,8 +1,8 @@
 from PowClient import PowClient
 
 own_port = 10000
-reflection_ip = ''
-reflection_port = 10559
+server_ip = ''
+server_port = 10001
 
-server = PowClient(own_port, reflection_ip, reflection_port)
+server = PowClient(own_port, server_ip, server_port)
 server.run()
