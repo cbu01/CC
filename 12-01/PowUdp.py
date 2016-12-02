@@ -1,7 +1,8 @@
 import socket, pickle
 from ReflectionServerUDP.reflectionServer import *
 
-R_SERVER_IP = "10.2.16.168"
+# R_SERVER_IP = "10.2.16.168"
+R_SERVER_IP = "localhost"
 R_SERVER_PORT = 10559
 
 

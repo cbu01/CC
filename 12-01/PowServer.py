@@ -36,7 +36,7 @@ class PowServer:
 
             # Wait for reply from udp server
             while True:
-                command, data = PowUdp.udp_receive(self.client_port)
+                command, data = PowUdp.udp_receive(self.own_port)
                 if command == PowHelper.CMD_RECEIVE_WORK_FROM_WORKER:
                     s, x, n = data
                     worker_response_checks_out = self._check_worker_response(s, n, x)

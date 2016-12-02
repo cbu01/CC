@@ -16,7 +16,7 @@ class PowClient:
                 self._do_work()
 
     def _check_for_work(self):
-        command, data = PowUdp.udp_receive(self.server_ip, self.server_port)
+        command, data = PowUdp.udp_receive(self.own_port)
         if command == PowHelper.CMD_SEND_TASK_TO_WORKER:
             print "Got work to do !"
             self.data = data
@@ -26,7 +26,7 @@ class PowClient:
     def _check_for_success(self):
         print "Waiting for a success/fail response from the server"
         while True:
-            command, data = PowUdp.udp_receive(self.server_ip, self.server_port)
+            command, data = PowUdp.udp_receive(self.own_port)
             if command == PowHelper.CMD_TASK_SUCCESS_REPLY:
                 work_successful = data
                 if work_successful:
