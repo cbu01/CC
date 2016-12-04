@@ -22,7 +22,7 @@ def find_x_competition(s_in_ascii, n):
 
         enough_zeros = verify_hash(s_in_ascii, x, n)
         if enough_zeros:
-            return binary_to_ascii(x)
+            return binary_to_ascii(x), x_counter
 
         x_counter += 1
 
