@@ -22,16 +22,8 @@ suffix = os.urandom(16)
 while notEnoughZeros:
 	digest = hashlib.sha256(prefix + suffix).digest()
 	bin_repr = bin(int(binascii.hexlify(digest), 16))[2:].zfill(256)
-	print "bin representation"
-	print bin_repr
-	print "len bin repr"
-	print len(bin_repr)
-	print "suffix"
 	bin_suffix = bin_repr[256-number:]
-	print bin_suffix
 	zeros = bin_suffix.count('0')
-	print "zeros"
-	print zeros
 	if zeros == number:
 		notEnoughZeros = False
 	else:
