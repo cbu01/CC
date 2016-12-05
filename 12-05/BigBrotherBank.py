@@ -5,10 +5,12 @@ import os.path
 import time
 import uuid
 import Common
+import RSAWrapper
 
 
 class BigBrotherBank:
     def __init__(self, data_file_name):
+        self._key = self._load_keys("BBBPrivateKey.pickle")
         self._data_file_name = data_file_name
         self._balances_dict = {}
         self._transactions_dict = {}
@@ -64,7 +66,7 @@ class BigBrotherBank:
         return False
 
     def _load_data_from_file(self):
-        if not self._data_file_exists():
+        if not self._data_file_exists(self._data_file_name):
             self._create_initial_data()
         else:
             self._balances_dict, self._transactions_dict, self._next_transaction_int_id = pickle.load(open(self._data_file_name, "rb"))
@@ -74,9 +76,9 @@ class BigBrotherBank:
         data_to_save = (self._balances_dict, self._transactions_dict, self._next_transaction_int_id)
         pickle.dump(data_to_save, open(self._data_file_name, "wb"))
 
-    def _data_file_exists(self):
+    def _data_file_exists(self, data_file_name):
         cwd = os.getcwd()
-        file_path = os.path.join(cwd, self._data_file_name)
+        file_path = os.path.join(cwd, data_file_name)
         return os.path.isfile(file_path)
 
     def _create_initial_data(self):
@@ -87,6 +89,18 @@ class BigBrotherBank:
         self._next_transaction_int_id += 1
         return Common.int_to_id(self._next_transaction_int_id)
         #return uuid.uuid4().hex
+
+    def _load_keys(self, key_file_name):
+        key_file_exists = self._data_file_exists(key_file_name)
+        if not key_file_exists:
+            _key = RSAWrapper.keygen()
+            public_key = _key.publickey()
+            pickle.dump(_key, open(key_file_name, "wb"))
+            pickle.dump(public_key, open("BBBPublicKey.pickle", "wb"))
+        else:
+            _key = pickle.load(open(key_file_name, "rb"))
+
+        return _key
 
     def Listen(self):
         while True:
