@@ -16,7 +16,7 @@ class Client:
 		return
 
 	def __receiveMessage(self):
-		message, addr = self.s.receivefrom(1024)
+		message, addr = self.s.recvfrom(1024)
 		return message
 
 	#######################################################################
@@ -27,7 +27,7 @@ class Client:
 			if (a <= 0):
 				print "transaction not successful - choose a positive amount of money"
 			else:
-				message = pickle.dumps("PAY", self.ID, id2, a)
+				message = pickle.dumps(("PAY", self.ID, id2, a))
 				self.__sendMessage(message)
 				reply = self.__receiveMessage()
 				if type(reply) == bool:
@@ -65,6 +65,7 @@ class Client:
 		loop = True
 		while loop:
 			x = raw_input(">: ").split()
+			print x
 			if (x[0] == "pay"):
 				self.__pay(x[1],x[2])
 			elif (x[1] == "query"):
