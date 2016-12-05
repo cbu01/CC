@@ -46,6 +46,8 @@ class BigBrotherBank:
         transaction_id = self._generate_new_id()
         self._transactions_dict[transaction_id] = ((id1, id2, amount, time.time()))
 
+        self._save_data_to_file()
+
         return transaction_id
 
     def query(self, id1, id2, transaction_id, amount):
@@ -65,6 +67,7 @@ class BigBrotherBank:
             self._create_initial_data()
         else:
             self._balances_dict, self._transactions_dict, self._next_transaction_int_id = pickle.load(open(self._data_file_name, "rb"))
+            print "All current balances for accounts are :" + str(self._balances_dict)
 
     def _save_data_to_file(self):
         data_to_save = (self._balances_dict, self._transactions_dict, self._next_transaction_int_id)
