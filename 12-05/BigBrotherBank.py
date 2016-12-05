@@ -4,12 +4,15 @@ import os
 import os.path
 import time
 import uuid
+import Common
+
 
 class BigBrotherBank:
     def __init__(self, data_file_name):
         self._data_file_name = data_file_name
         self._balances_dict = {}
         self._transactions_dict = {}
+        self._next_transaction_int_id = 100
         self._load_data_from_file()
         self._host = "localhost"
         self._port = 10555
@@ -58,10 +61,10 @@ class BigBrotherBank:
         if not self._data_file_exists():
             self._create_initial_data()
         else:
-            self._balances_dict, self._transactions_dict = pickle.load(open(self._data_file_name, "rb"))
+            self._balances_dict, self._transactions_dict, self._next_transaction_int_id = pickle.load(open(self._data_file_name, "rb"))
 
     def _save_data_to_file(self):
-        data_to_save = (self._balances_dict, self._transactions_dict)
+        data_to_save = (self._balances_dict, self._transactions_dict, self._next_transaction_int_id)
         pickle.dump(data_to_save, open(self._data_file_name, "wb"))
 
     def _data_file_exists(self):
@@ -70,11 +73,13 @@ class BigBrotherBank:
         return os.path.isfile(file_path)
 
     def _create_initial_data(self):
-        self._balances_dict = {31*"0" + "1": 10, 31*"0" + "2": 10}
+        self._balances_dict = {Common.int_to_id(1): 10, Common.int_to_id(2): 10}
         self._save_data_to_file()
 
     def _generate_new_id(self):
-        return uuid.uuid4().hex
+        self._next_transaction_int_id += 1
+        return Common.int_to_id(self._next_transaction_int_id)
+        #return uuid.uuid4().hex
 
     def Listen(self):
         while True:
