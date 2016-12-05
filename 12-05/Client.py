@@ -30,10 +30,9 @@ class Client:
 				message = pickle.dumps(("PAY", self.ID, id2, a))
 				self.__sendMessage(message)
 				reply = self.__receiveMessage()
-				if type(reply) == bool:
-					if (reply == False):
-						print "transaction not successfull - rejected by BBB"
-						return
+				if (reply == "False"):
+					print "transaction not successfull - rejected by BBB"
+					return
 				else:
 					print "transaction successful with transaction ID: " + str(reply)
 					return				 
@@ -47,7 +46,7 @@ class Client:
 			message = pickle.dumps("QUERY", self.ID, id2, transactionID, amount)
 			self.__sendMessage(message)
 			reply = self.__receiveMessage()
-			if reply:
+			if (reply == "True"):
 				print "Money received"
 				return
 			else:
