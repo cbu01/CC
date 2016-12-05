@@ -6,6 +6,7 @@ import time
 
 class BigBrotherBank:
     def __init__(self, data_file_name):
+        self._next_generated_int_id = 0
         self._data_file_name = data_file_name
         self._balances_dict = {}
         self._transactions_dict = {}
@@ -52,10 +53,10 @@ class BigBrotherBank:
         if not self._data_file_exists():
             self._create_initial_data()
         else:
-            self._balances_dict, self._transactions_dict = pickle.load(open(self._data_file_name, "rb"))
+            self._balances_dict, self._transactions_dict, self._next_generated_int_id = pickle.load(open(self._data_file_name, "rb"))
 
     def _save_data_to_file(self):
-        data_to_save = self._balances_dict, self._transactions_dict
+        data_to_save = (self._balances_dict, self._transactions_dict, self._next_generated_int_id)
         pickle.dump(data_to_save, open(self._data_file_name, "wb"))
 
     def _data_file_exists(self):
@@ -68,8 +69,9 @@ class BigBrotherBank:
         self._balances_dict = {"1": 10, "2": 10}
 
     def _generate_new_id(self):
-        #TODO
-        pass
+        #TODO move away from int ids
+        self._next_generated_int_id += 1
+        return self._next_generated_int_id
 
 
 if __name__ == "__main__":
