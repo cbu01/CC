@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="266e5200-3395-4ac3-bf69-46c039ee6e95" name="Default" comment="Adding a description for a">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/12-05/BigBrotherBank.py" afterPath="$PROJECT_DIR$/12-05/BigBrotherBank.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/12-05/Client.py" afterPath="$PROJECT_DIR$/12-05/Client.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/12-05/Client_2.py" afterPath="$PROJECT_DIR$/12-05/Client_2.py" />
     </list>
     <ignored path="CC.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,9 +27,9 @@
     <SUITE FILE_PATH="coverage/Repo$reflectionServer.coverage" NAME="reflectionServer Coverage Results" MODIFIED="1480677847585" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01/ReflectionServerUDP" />
     <SUITE FILE_PATH="coverage/CC$testSignature.coverage" NAME="testSignature Coverage Results" MODIFIED="1480507247492" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/11-30" />
     <SUITE FILE_PATH="coverage/Repo$PowServer.coverage" NAME="PowServer Coverage Results" MODIFIED="1480678813505" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
-    <SUITE FILE_PATH="coverage/Repo$Client_2.coverage" NAME="Client_2 Coverage Results" MODIFIED="1480949723970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-05" />
+    <SUITE FILE_PATH="coverage/Repo$Client_2.coverage" NAME="Client_2 Coverage Results" MODIFIED="1480950486400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-05" />
     <SUITE FILE_PATH="coverage/CC$rsaTest.coverage" NAME="rsaTest Coverage Results" MODIFIED="1480505318511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/11-29" />
-    <SUITE FILE_PATH="coverage/Repo$BigBrotherBank.coverage" NAME="BigBrotherBank Coverage Results" MODIFIED="1480949684972" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-05" />
+    <SUITE FILE_PATH="coverage/Repo$BigBrotherBank.coverage" NAME="BigBrotherBank Coverage Results" MODIFIED="1480950481682" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-05" />
     <SUITE FILE_PATH="coverage/Repo$runnerPowClient.coverage" NAME="runnerPowClient Coverage Results" MODIFIED="1480678888536" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
     <SUITE FILE_PATH="coverage/CC$mannsiHashRunner.coverage" NAME="mannsiHashRunner Coverage Results" MODIFIED="1480523823861" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/11-30" />
     <SUITE FILE_PATH="coverage/Repo$runnerPowBenchmark.coverage" NAME="runnerPowBenchmark Coverage Results" MODIFIED="1480695527137" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/12-01" />
@@ -43,8 +46,8 @@
       <file leaf-file-name="BigBrotherBank.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/12-05/BigBrotherBank.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
-              <caret line="69" column="86" selection-start-line="69" selection-start-column="86" selection-end-line="69" selection-end-column="86" />
+            <state relative-caret-position="306">
+              <caret line="105" column="0" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -67,8 +70,8 @@
       <file leaf-file-name="Client_2.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/12-05/Client_2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+            <state relative-caret-position="68">
+              <caret line="4" column="33" selection-start-line="4" selection-start-column="33" selection-end-line="4" selection-end-column="33" />
               <folding>
                 <element signature="e#0#25#0" expanded="true" />
               </folding>
@@ -79,8 +82,8 @@
       <file leaf-file-name="Client.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/12-05/Client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="459">
-              <caret line="77" column="0" selection-start-line="77" selection-start-column="0" selection-end-line="77" selection-end-column="0" />
+            <state relative-caret-position="323">
+              <caret line="46" column="76" selection-start-line="46" selection-start-column="76" selection-end-line="46" selection-end-column="76" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -631,9 +634,9 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.Client_1" />
-        <item index="1" class="java.lang.String" itemvalue="Python.Client_2" />
-        <item index="2" class="java.lang.String" itemvalue="Python.BigBrotherBank" />
+        <item index="0" class="java.lang.String" itemvalue="Python.Client_2" />
+        <item index="1" class="java.lang.String" itemvalue="Python.BigBrotherBank" />
+        <item index="2" class="java.lang.String" itemvalue="Python.Client_1" />
         <item index="3" class="java.lang.String" itemvalue="Python.runnerPowBenchmark" />
         <item index="4" class="java.lang.String" itemvalue="Python.powCompClient" />
       </list>
@@ -722,13 +725,13 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32932165" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31838074" sideWeight="0.464992" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31838074" sideWeight="0.50774986" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32932165" sideWeight="0.49812934" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31838074" sideWeight="0.535008" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31838074" sideWeight="0.49225014" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32932165" sideWeight="0.49812934" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2428884" sideWeight="0.4703367" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2428884" sideWeight="0.42757884" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -788,7 +791,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="65" />
+      <option name="time" value="72" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1124,16 +1127,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/12-05/Client_2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/12-05/Client_1.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -1144,10 +1137,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/12-05/Client_2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="33" selection-start-line="4" selection-start-column="33" selection-end-line="4" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/12-05/Client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="77" column="0" selection-start-line="77" selection-start-column="0" selection-end-line="77" selection-end-column="0" />
+        <state relative-caret-position="323">
+          <caret line="46" column="76" selection-start-line="46" selection-start-column="76" selection-end-line="46" selection-end-column="76" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -1156,8 +1159,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/12-05/BigBrotherBank.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="69" column="86" selection-start-line="69" selection-start-column="86" selection-end-line="69" selection-end-column="86" />
+        <state relative-caret-position="306">
+          <caret line="105" column="0" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>

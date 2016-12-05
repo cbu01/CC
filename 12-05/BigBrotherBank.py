@@ -58,9 +58,10 @@ class BigBrotherBank:
             return False
 
         # Check if every part of the query matches the saved transaction
-        logged_id1, logged_id2, logged_amount = self._transactions_dict[transaction_id]
-        if logged_id1 == id1 and logged_id2 == id2 and logged_amount == amount:
+        logged_id1, logged_id2, logged_amount, time_stamp = self._transactions_dict[transaction_id]
+        if logged_id1 == id1 and logged_id2 == id2 and logged_amount == float(amount):
             return True
+        return False
 
     def _load_data_from_file(self):
         if not self._data_file_exists():
@@ -98,7 +99,7 @@ class BigBrotherBank:
                     self._s.sendto(str(success), addr)
                 except ValueError:
                     self._s.sendto(str(False), addr)
-            elif message[1] == "QUERY" and len(message) == 5:
+            elif message[0] == "QUERY" and len(message) == 5:
                 try:
                     a = float(message[4])
                     success = self.query(message[1], message[2], message[3], message[4])

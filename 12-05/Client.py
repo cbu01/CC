@@ -44,7 +44,7 @@ class Client:
 	def __query(self, id2, transactionID, amount):
 		try:
 			a = float(amount) #cast amount to float
-			message = pickle.dumps("QUERY", self.ID, Common.int_to_id(id2), Common.int_to_id(transactionID), amount)
+			message = pickle.dumps(("QUERY", Common.int_to_id(id2) , self.ID, Common.int_to_id(transactionID), amount))
 			self.__sendMessage(message)
 			reply = self.__receiveMessage()
 			if (reply == "True"):
