@@ -11,6 +11,11 @@ class BigBrotherBank:
         self._balances_dict = {}
         self._transactions_dict = {}
         self._load_data_from_file()
+		self._host = "localhost"
+		self._port = 10555
+
+		self._s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self._s.bind((_host,_port))
 
     def pay(self, id1, id2, amount):
         """ Returns a transaction id if id1 can transfer amount to id2.
@@ -73,10 +78,34 @@ class BigBrotherBank:
         self._next_generated_int_id += 1
         return self._next_generated_int_id
 
+	def Listen(self):
+		while True:
+			self._s.listen(1)
+			data, addr = self._s.receivefrom(1024)
+			message = unpickle(data)
+			if (message[0] == "PAY" & len(message) == 4):
+				try: 
+					a = message[3]
+					success = pay(message[1], message[2], message[3])
+					self._s.sendto(success, addr)
+					return
+				except ValueError:
+					self._s.sendto(False, addr)
+					return	
+			else if (message[1] == "QUERY" & len(message) == 5):
+				try:
+					a = message[4]
+					success = query(message[1], message[2], message[3], message[4])
+					self._s.sendto(False, addr)
+			else:
+				self._s.sendto(False, addr)
+		
+
 
 if __name__ == "__main__":
     data_file = "Database.pickle"
     bbb = BigBrotherBank(data_file)
-    # TODO start listening for incoming upd calls
+	bbb.Listen()
+	
 
 
