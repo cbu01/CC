@@ -82,11 +82,11 @@ class BigBrotherBank:
     def Listen(self):
         while True:
             data, addr = self._s.recvfrom(1024)
-            message = unpickle(data)
+            message = pickle.loads(data)
             if (message[0] == "PAY" & len(message) == 4):
                 try: 
                     a = message[3]
-                    success = pay(message[1], message[2], message[3])
+                    success = self.pay(message[1], message[2], message[3])
                     self._s.sendto(success, addr)
                     return
                 except ValueError:
@@ -95,7 +95,7 @@ class BigBrotherBank:
             elif (message[1] == "QUERY" & len(message) == 5):
                 try:
                     a = message[4]
-                    success = query(message[1], message[2], message[3], message[4])
+                    success = self.query(message[1], message[2], message[3], message[4])
                     self._s.sendto(False, addr)
                     return
                 except ValueError:
