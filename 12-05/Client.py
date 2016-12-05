@@ -1,5 +1,6 @@
-import pickle, socket
+import pickle, socket, os, sys
 import Common
+import RSAWrapper
 
 class Client:
 
@@ -7,8 +8,14 @@ class Client:
 		self.ID = ID
 		self.BBBhost = "localhost"
 		self.BBBport = 10555
-		#init socket
+		
+		self._BBB_key = pickle.load(open("BBBPublicKey.pickle", "rb"))
+		
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		
+		self._key = self._load_keys(str(ID)+"PrivateKey.pickle")
+		
+		
 
 	#######################################################################
 
@@ -17,7 +24,7 @@ class Client:
 		return
 
 	def __receiveMessage(self):
-		message, addr = self.s.recvfrom(1024)
+		message, addr = self.s.recvfrom(2048)
 		return message
 
 	#######################################################################
@@ -56,8 +63,38 @@ class Client:
 		except ValueError:
 			print "transaction not successful - enter amount as a number"
 			return
-			
 		
+		
+	######################################################################
+	
+	def _data_file_exists(self, data_file_name):
+		cwd = os.getcwd()
+		file_path = os.path.join(cwd, data_file_name)
+		return os.path.isfile(file_path)
+       
+	def _load_keys(self, key_file_name):
+		key_file_exists = self._data_file_exists(key_file_name)
+		if not key_file_exists:
+			_key = RSAWrapper.keygen()
+			pickle.dump(_key, open(key_file_name, "wb"))
+			self._register(_key.publickey())
+		else:
+			_key = pickle.load(open(key_file_name, "rb"))
+
+		return _key
+       
+	def _register(self, _public_key):
+		r_message = pickle.dumps(("REGISTER", self.ID, _public_key))
+		self.__sendMessage(r_message)
+		reply = self.__receiveMessage()
+		if (reply == "True"):
+			print "Successfully registered"
+			return
+		else :
+			print "Registration not possible"
+			sys.exit(0)
+			return
+					
 
 	#######################################################################
 

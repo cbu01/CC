@@ -11,6 +11,7 @@ import RSAWrapper
 class BigBrotherBank:
     def __init__(self, data_file_name):
         self._key = self._load_keys("BBBPrivateKey.pickle")
+        self._client_public_keys = {}
         self._data_file_name = data_file_name
         self._balances_dict = {}
         self._transactions_dict = {}
@@ -18,7 +19,7 @@ class BigBrotherBank:
         self._load_data_from_file()
         self._host = "localhost"
         self._port = 10555
-        self._client_public_keys = {}
+       
 
         self._s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._s.bind((self._host,self._port))
@@ -72,6 +73,7 @@ class BigBrotherBank:
             return False
         self._client_public_keys[client_id] = client_public_key
         self._save_data_to_file()
+        return True
 
     def _load_data_from_file(self):
         if not self._data_file_exists(self._data_file_name):
@@ -112,7 +114,7 @@ class BigBrotherBank:
 
     def Listen(self):
         while True:
-            data, addr = self._s.recvfrom(1024)
+            data, addr = self._s.recvfrom(2048)
             message = pickle.loads(data)
             if message[0] == "PAY" and len(message) == 4:
                 try: 
@@ -128,6 +130,9 @@ class BigBrotherBank:
                     self._s.sendto(str(success), addr)
                 except ValueError:
                     self._s.sendto(str(False), addr)
+            elif message[0] == "REGISTER" and len(message) == 3:
+                success = self.register_client(message[1], message[2])
+                self._s.sendto(str(success), addr)
             else:
                 self._s.sendto(str(False), addr)
 
