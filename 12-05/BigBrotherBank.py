@@ -93,22 +93,17 @@ class BigBrotherBank:
                     a = message[3]
                     success = self.pay(message[1], message[2], message[3])
                     self._s.sendto(str(success), addr)
-                    return
                 except ValueError:
                     self._s.sendto(str(False), addr)
-                    return	
             elif message[1] == "QUERY" and len(message) == 5:
                 try:
                     a = float(message[4])
                     success = self.query(message[1], message[2], message[3], message[4])
                     self._s.sendto(str(success), addr)
-                    return
                 except ValueError:
                     self._s.sendto(str(False), addr)
-                    return
             else:
-                self._s.sendto(False, addr)
-                return
+                self._s.sendto(str(False), addr)
 
 
 if __name__ == "__main__":
