@@ -70,7 +70,6 @@ class BigBrotherBank:
         return os.path.isfile(file_path)
 
     def _create_initial_data(self):
-        #TODO update the ids and maybe the values
         self._balances_dict = {31*"0" + "1": 10, 31*"0" + "2": 10}
 
     def _generate_new_id(self):
@@ -101,13 +100,12 @@ class BigBrotherBank:
             else:
                 self._s.sendto(False, addr)
                 return
-		
 
 
 if __name__ == "__main__":
     data_file = "Database.pickle"
     bbb = BigBrotherBank(data_file)
     bbb.Listen()
-	
+
 
 
