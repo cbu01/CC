@@ -71,6 +71,7 @@ class BigBrotherBank:
 
     def _create_initial_data(self):
         self._balances_dict = {31*"0" + "1": 10, 31*"0" + "2": 10}
+        self._save_data_to_file()
 
     def _generate_new_id(self):
         return uuid.uuid4().hex
