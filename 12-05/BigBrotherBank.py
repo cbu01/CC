@@ -18,6 +18,7 @@ class BigBrotherBank:
         self._load_data_from_file()
         self._host = "localhost"
         self._port = 10555
+        self._client_public_keys = {}
 
         self._s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._s.bind((self._host,self._port))
@@ -65,15 +66,22 @@ class BigBrotherBank:
             return True
         return False
 
+    def register_client(self, client_id, client_public_key):
+        if client_id in self._client_public_keys:
+            # Client is already registered, not cool
+            return False
+        self._client_public_keys[client_id] = client_public_key
+        self._save_data_to_file()
+
     def _load_data_from_file(self):
         if not self._data_file_exists(self._data_file_name):
             self._create_initial_data()
         else:
-            self._balances_dict, self._transactions_dict, self._next_transaction_int_id = pickle.load(open(self._data_file_name, "rb"))
+            self._balances_dict, self._transactions_dict, self._next_transaction_int_id, self._client_public_keys = pickle.load(open(self._data_file_name, "rb"))
             print "All current balances for accounts are :" + str(self._balances_dict)
 
     def _save_data_to_file(self):
-        data_to_save = (self._balances_dict, self._transactions_dict, self._next_transaction_int_id)
+        data_to_save = (self._balances_dict, self._transactions_dict, self._next_transaction_int_id, self._client_public_keys)
         pickle.dump(data_to_save, open(self._data_file_name, "wb"))
 
     def _data_file_exists(self, data_file_name):
