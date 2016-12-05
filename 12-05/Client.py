@@ -49,13 +49,13 @@ class Client:
 			reply = self.__receiveMessage()
 			if reply:
 				print "Money received"
-                return
-            else:
+				return
+			else:
 				print "Money has not been received"
-                return
-        except ValueError:
-            print "transaction not successful - enter amount as a number"
-            return
+				return
+		except ValueError:
+			print "transaction not successful - enter amount as a number"
+			return
 			
 		
 
@@ -73,5 +73,6 @@ class Client:
 				loop = False
 			else:
 				print "Please enter something useful"
+
 
 
