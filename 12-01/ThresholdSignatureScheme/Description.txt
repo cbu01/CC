@@ -1,0 +1,11 @@
+// Rough description for a possible threshhold signature scheme where k out of n Bobs need to sign a message
+
+We have k out of n Bobs that need to sign a message using their private keys.
+
+Every one of the k Bobs does the following:
+1. Uses his decryption key to create a cipher text
+2. Updates the cipher text by appending his/her number to it
+3. Sends the updated cipher text to the next Bob
+
+Now everyone on the internet can take the message and the final cipher text, extract the number from the last Bob from it. Using that Bobs public encryption key to retrieve the previous Bobs cipher text + number.
+This is done k times until the final message is revealed for comparison.
