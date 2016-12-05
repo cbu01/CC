@@ -71,7 +71,7 @@ class BigBrotherBank:
 
     def _create_initial_data(self):
         #TODO update the ids and maybe the values
-        self._balances_dict = {"1": 10, "2": 10}
+        self._balances_dict = {31*"0" + "1": 10, 31*"0" + "2": 10}
 
     def _generate_new_id(self):
         return uuid.uuid4().hex
