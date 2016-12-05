@@ -85,23 +85,23 @@ class BigBrotherBank:
         while True:
             data, addr = self._s.recvfrom(1024)
             message = pickle.loads(data)
-            if (message[0] == "PAY" & len(message) == 4):
+            if message[0] == "PAY" and len(message) == 4:
                 try: 
                     a = message[3]
                     success = self.pay(message[1], message[2], message[3])
-                    self._s.sendto(success, addr)
+                    self._s.sendto(str(success), addr)
                     return
                 except ValueError:
-                    self._s.sendto(False, addr)
+                    self._s.sendto(str(False), addr)
                     return	
-            elif (message[1] == "QUERY" & len(message) == 5):
+            elif message[1] == "QUERY" and len(message) == 5:
                 try:
-                    a = message[4]
+                    a = float(message[4])
                     success = self.query(message[1], message[2], message[3], message[4])
-                    self._s.sendto(False, addr)
+                    self._s.sendto(str(success), addr)
                     return
                 except ValueError:
-                    self._s.sendto(False, addr)
+                    self._s.sendto(str(False), addr)
                     return
             else:
                 self._s.sendto(False, addr)
