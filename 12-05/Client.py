@@ -1,4 +1,5 @@
 import pickle, socket
+import Common
 
 class Client:
 
@@ -27,7 +28,7 @@ class Client:
 			if (a <= 0):
 				print "transaction not successful - choose a positive amount of money"
 			else:
-				message = pickle.dumps(("PAY", self.ID, id2, a))
+				message = pickle.dumps(("PAY", self.ID, Common.int_to_id(id2), a))
 				self.__sendMessage(message)
 				reply = self.__receiveMessage()
 				if (reply == "False"):
@@ -43,7 +44,7 @@ class Client:
 	def __query(self, id2, transactionID, amount):
 		try:
 			a = float(amount) #cast amount to float
-			message = pickle.dumps("QUERY", self.ID, id2, transactionID, amount)
+			message = pickle.dumps("QUERY", self.ID, Common.int_to_id(id2), Common.int_to_id(transactionID), amount)
 			self.__sendMessage(message)
 			reply = self.__receiveMessage()
 			if (reply == "True"):
@@ -67,7 +68,7 @@ class Client:
 			print x
 			if (x[0] == "pay"):
 				self.__pay(x[1],x[2])
-			elif (x[1] == "query"):
+			elif (x[0] == "query"):
 				self.__query(x[1],x[2],x[3])
 			elif (x[0] == "quit"):
 				loop = False

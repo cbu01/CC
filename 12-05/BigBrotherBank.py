@@ -23,6 +23,8 @@ class BigBrotherBank:
     def pay(self, id1, id2, amount):
         """ Returns a transaction id if id1 can transfer amount to id2.
             Returns False otherwise or if something went wrong """
+        print "Got payment request from id1: {0}, id2:{1} and amount: {2}".format(id1, id2, amount)
+
         if id1 not in self._balances_dict:
             # Id1 does not exist in system
             return False
@@ -48,6 +50,7 @@ class BigBrotherBank:
 
     def query(self, id1, id2, transaction_id, amount):
         """ Returns true if id1 has payed amount to id2 where the id of the transaction is transactionId """
+        print "Got query request from id1: {0}, id2:{1}, transactionId:{2} and amount: {3}".format(id1, id2, transaction_id, amount)
         if transaction_id not in self._transactions_dict:
             # Transaction with this id does not exist
             return False
