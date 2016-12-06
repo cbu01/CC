@@ -13,7 +13,7 @@ import hashlib
 class BigBrotherBank:
     def __init__(self, data_file_name):
         self._key = self._load_keys("BBBPrivateKey.pem")
-        self._client_public_keys = {}
+        self._client_public_keys = {}  # Stores {client_id, exported_client_public_key_that_needs_importing_to_work}
         self._data_file_name = data_file_name
         self._balances_dict = {}
         self._transactions_dict = {}
@@ -74,7 +74,8 @@ class BigBrotherBank:
         if client_id in self._client_public_keys:
             # Client is already registered, not cool
             return False
-        self._client_public_keys[client_id] = RSA.importKey(client_public_key)
+
+        self._client_public_keys[client_id] = client_public_key
         self._save_data_to_file()
         return client_id
 
@@ -106,7 +107,7 @@ class BigBrotherBank:
     def _generate_client_id(self, client_public_key):
         hasher = hashlib.sha256()
         hasher.update(client_public_key)
-        return hash.digest()
+        return hasher.digest()
 
     def _load_keys(self, key_file_name):
         key_file_exists = self._data_file_exists(key_file_name)

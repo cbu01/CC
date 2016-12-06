@@ -15,7 +15,7 @@ class Client:
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		
 		self._key = self._load_keys(str(ID)+"PrivateKey.pem")
-		print "key of client" + self_key
+		print "key of client" + self._key
 		
 		
 
