@@ -129,7 +129,7 @@ class BigBrotherBank:
     
     def __sendMessage(self, message, receiver, receiverID):
         signature = RSAWrapper.sign(message, self._key)
-        receiver_Key = self._client_public_keys[receiverID]
+        receiver_Key = RSA.importKey(self._client_public_keys[receiverID])
         p_s_message = pickle.dumps((message,signature))
         encMessage = RSAWrapper.encrypt(p_s_message, receiver_Key)
         self._s.sendto(encMessage, receiver)
