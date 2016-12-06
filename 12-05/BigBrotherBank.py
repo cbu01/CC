@@ -91,6 +91,7 @@ class BigBrotherBank:
             return False
 
         self._client_public_keys[client_id] = client_public_key
+        self._balances_dict[client_id] = 0
         self._save_data_to_file()
         return client_id
 
@@ -192,7 +193,7 @@ class BigBrotherBank:
             elif message[0] == "REGISTER" and len(message) == 3:
                 senderID = self.register_client(message[2])
                 if  senderID:
-                    self.__sendMessage(str(True), addr, senderID)
+                    self.__sendMessage(senderID, addr, senderID)
             else:
                 self.__sendMessage(str(False), addr, senderID)
 
