@@ -7,6 +7,7 @@ import uuid
 import Common
 import RSAWrapper
 from Crypto.PublicKey import RSA
+import hashlib
 
 
 class BigBrotherBank:
@@ -48,7 +49,7 @@ class BigBrotherBank:
         self._balances_dict[id2] += amount
 
         # Save the transaction
-        transaction_id = self._generate_new_id()
+        transaction_id = self._generate_transaction_id()
         self._transactions_dict[transaction_id] = ((id1, id2, amount, time.time()))
 
         self._save_data_to_file()
@@ -68,13 +69,14 @@ class BigBrotherBank:
             return True
         return False
 
-    def register_client(self, client_id, client_public_key):
+    def register_client(self, client_public_key):
+        client_id = self._generate_client_id(client_public_key)
         if client_id in self._client_public_keys:
             # Client is already registered, not cool
             return False
         self._client_public_keys[client_id] = RSA.importKey(client_public_key)
         self._save_data_to_file()
-        return True
+        return client_id
 
     def _load_data_from_file(self):
         if not self._data_file_exists(self._data_file_name):
@@ -96,10 +98,15 @@ class BigBrotherBank:
         self._balances_dict = {Common.int_to_id(1): 10, Common.int_to_id(2): 10}
         self._save_data_to_file()
 
-    def _generate_new_id(self):
+    def _generate_transaction_id(self):
         self._next_transaction_int_id += 1
         return Common.int_to_id(self._next_transaction_int_id)
         #return uuid.uuid4().hex
+
+    def _generate_client_id(self, client_public_key):
+        hasher = hashlib.sha256()
+        hasher.update(client_public_key)
+        return hash.digest()
 
     def _load_keys(self, key_file_name):
         key_file_exists = self._data_file_exists(key_file_name)
@@ -166,7 +173,7 @@ class BigBrotherBank:
                 except ValueError:
                     self.__sendMessage(str(False), addr, senderID)
             elif message[0] == "REGISTER" and len(message) == 3:
-                success = self.register_client(message[1], message[2])
+                success = self.register_client(message[2])
                 self.__sendMessage(str(success), addr, senderID)
             else:
                 self.__sendMessage(str(False), addr, senderID)
@@ -176,6 +183,3 @@ if __name__ == "__main__":
     data_file = "Database.pickle"
     bbb = BigBrotherBank(data_file)
     bbb.Listen()
-
-
-
