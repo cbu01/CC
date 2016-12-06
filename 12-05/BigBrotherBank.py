@@ -197,8 +197,12 @@ class BigBrotherBank:
             elif message[0] == "QUERY" and len(message) == 5:
                 try:
                     a = float(message[4])
-                    success = self.query(message[1], message[2], message[3], message[4])
-                    self._s.sendMessage(str(success), addr, senderID)
+                    sender_id = message[2]
+                    receiver_id = message[1]
+                    transaction_id = message[3]
+                    amount = message[4]
+                    success = self.query(sender_id, receiver_id, transaction_id, amount)
+                    self.__sendMessage(str(success), addr, senderID)
                 except ValueError:
                     self.__sendMessage(str(False), addr, senderID)
             elif message[0] == "REGISTER" and len(message) == 3:

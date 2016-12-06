@@ -64,10 +64,12 @@ class Client:
             print e
             return
 
-    def __query(self, id2, transactionID, amount):
+    def __query(self, source_client_name, transactionID, amount):
         try:
             a = float(amount)  # cast amount to float
-            message = pickle.dumps(("QUERY", Common.int_to_id(id2), self._ID, Common.int_to_id(transactionID), amount))
+            source_client_id = self._get_client_id_from_global_name(source_client_name)
+
+            message = pickle.dumps(("QUERY", self._ID, source_client_id, Common.int_to_id(transactionID), amount))
             self.__sendMessage(message)
             reply = self.__receiveMessage()
             if (reply == "True"):
