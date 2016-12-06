@@ -11,6 +11,7 @@ def keygen():
 
 def encrypt(string, key):
 	cipher = PKCS1_OAEP.new(key)
+	print string
 	enc = cipher.encrypt(string)
 	return enc
 
@@ -21,14 +22,14 @@ def decrypt(string, key):
 
 def sign(string, key):
 	hashValue = SHA.new(string)
-	signer = PKCS_v1_5.new(key)
+	signer = PKCS1_v1_5.new(key)
 	signature = signer.sign(hashValue)
 	return signature
 	
-def verify(string, key):
+def verify(string, signature, key):
 	hashValue = SHA.new(string)
 	verifier = PKCS1_v1_5.new(key)
-	if verifier.verify(h, signature):
+	if verifier.verify(hashValue, signature):
 		return True
 	else:
 		return False

@@ -1,6 +1,7 @@
 import pickle, socket, os, sys
 import Common
 import RSAWrapper
+from Crypto.PublicKey import RSA
 
 class Client:
 
@@ -9,23 +10,31 @@ class Client:
 		self.BBBhost = "localhost"
 		self.BBBport = 10555
 		
-		self._BBB_key = pickle.load(open("BBBPublicKey.pickle", "rb"))
+		self._BBB_key = RSA.importKey(open("BBBPublicKey.pem", "r"))
 		
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		
-		self._key = self._load_keys(str(ID)+"PrivateKey.pickle")
+		self._key = self._load_keys(str(ID)+"PrivateKey.pem")
 		
 		
 
 	#######################################################################
 
 	def __sendMessage(self, message):
-		self.s.sendto(message, (self.BBBhost, self.BBBport))
+		signature = RSAWrapper.sign(message, self._key)
+		encMessage = RSAWrapper.encrypt((message, signature), self._BBB_key)
+		self.s.sendto(encMessage, (self.BBBhost, self.BBBport))
 		return
 
 	def __receiveMessage(self):
 		message, addr = self.s.recvfrom(2048)
-		return message
+		decMessage, signature = RSAWrapper.decrypt(message, self._key)
+		validSignature = RSAWrapper.verify(decMessage, self._BBB_key)
+		if (validSignature):
+			return decMessage
+		else: 
+			print "WARNING: Invalid Signature!!!"
+			return decMessage
 
 	#######################################################################
 
@@ -76,16 +85,19 @@ class Client:
 		key_file_exists = self._data_file_exists(key_file_name)
 		if not key_file_exists:
 			_key = RSAWrapper.keygen()
-			pickle.dump(_key, open(key_file_name, "wb"))
+			file = open(key_file_name, "w+")
+			file.write(_key.exportKey('PEM'))
+			file.close()
 			self._register(_key.publickey())
 		else:
-			_key = pickle.load(open(key_file_name, "rb"))
+			_key = RSA.importKey(open(key_file_name, "r"))
 
 		return _key
        
 	def _register(self, _public_key):
 		r_message = pickle.dumps(("REGISTER", self.ID, _public_key))
-		self.__sendMessage(r_message)
+		enc_r_message = RSAWrapper.encrypt(r_message, self._BBB_key)
+		self.__sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
 		reply = self.__receiveMessage()
 		if (reply == "True"):
 			print "Successfully registered"

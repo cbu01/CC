@@ -6,11 +6,12 @@ import time
 import uuid
 import Common
 import RSAWrapper
+from Crypto.PublicKey import RSA
 
 
 class BigBrotherBank:
     def __init__(self, data_file_name):
-        self._key = self._load_keys("BBBPrivateKey.pickle")
+        self._key = self._load_keys("BBBPrivateKey.pem")
         self._client_public_keys = {}
         self._data_file_name = data_file_name
         self._balances_dict = {}
@@ -105,36 +106,69 @@ class BigBrotherBank:
         if not key_file_exists:
             _key = RSAWrapper.keygen()
             public_key = _key.publickey()
-            pickle.dump(_key, open(key_file_name, "wb"))
-            pickle.dump(public_key, open("BBBPublicKey.pickle", "wb"))
+            f_priv = open(key_file_name, "w+")
+            f_priv.write(_key.exportKey('PEM'))
+            f_priv.close()
+            f_pub = open("BBBPublicKey.pem", "w+")
+            f_pub.write(public_key.exportKey('PEM'))
+            f_pub.close()
         else:
-            _key = pickle.load(open(key_file_name, "rb"))
+            _key = RSA.importKey(open(key_file_name, "r"))
 
         return _key
+    
+    #########################################################################
+    
+    def __sendMessage(self, message, receiver, receiverID):
+        signature = RSAWrapper.sibling(message, self._key)
+        #find key of receiver
+        encMessage = RSAWrapper.encrypt((message, signature), receiver_Key)
+        self._s.sendto(encMessage, receiver)
+        return
+
+    def __receiveMessage(self):
+        message, addr = self._s.recvfrom(2048)
+        decMessage = RSAWrapper.decrypt(message, self._key)
+        if type(decMessage) != tuple: # then this is a key which is NOT signed
+            pMessage = pickle.loads(decMessage)
+            senderID = pMessage[1]
+            return pMessage, addr, senderID
+        else :
+            message = pickle.loads(decMessage[0]) # extract message
+            signature = decMessage[1] # extract signature
+            senderID = message[1] # get id
+            #find key of sender
+            validSignature = RSAWrapper.verify(decMessage[0], decMessage[1], sender_Key)
+            if (validSignature):
+                return message, addr, senderID
+            else: 
+                print "WARNING: Invalid Signature!!!"
+                return message, addr, senderID
+        
+    ########################################################################
 
     def Listen(self):
         while True:
-            data, addr = self._s.recvfrom(2048)
-            message = pickle.loads(data)
+            data, addr, senderID = self.__receiveMessage()
             if message[0] == "PAY" and len(message) == 4:
                 try: 
                     a = message[3]
                     success = self.pay(message[1], message[2], message[3])
-                    self._s.sendto(str(success), addr)
+                    self.__sendMessage(str(success), addr, senderID)
                 except ValueError:
-                    self._s.sendto(str(False), addr)
+                    self.__sendMessage(str(False), addr, senderID)
             elif message[0] == "QUERY" and len(message) == 5:
                 try:
                     a = float(message[4])
                     success = self.query(message[1], message[2], message[3], message[4])
-                    self._s.sendto(str(success), addr)
+                    self._s.sendMessage(str(success), addr, senderID)
                 except ValueError:
-                    self._s.sendto(str(False), addr)
+                    self.__sendMessage(str(False), addr, senderID)
             elif message[0] == "REGISTER" and len(message) == 3:
                 success = self.register_client(message[1], message[2])
-                self._s.sendto(str(success), addr)
+                self.__sendMessage(str(success), addr, senderID)
             else:
-                self._s.sendto(str(False), addr)
+                self.__sendMessage(str(False), addr, senderID)
 
 
 if __name__ == "__main__":
