@@ -6,6 +6,7 @@ import time
 import RSAWrapper
 from Crypto.PublicKey import RSA
 import hashlib
+import Common
 
 
 class BigBrotherBank:

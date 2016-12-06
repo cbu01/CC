@@ -1,6 +1,7 @@
 import pickle, socket, os, sys
 import RSAWrapper
 from Crypto.PublicKey import RSA
+import Common
 
 
 class Client:
