@@ -12,10 +12,14 @@ class Client:
 		
 		self._BBB_key = RSA.importKey(open("BBBPublicKey.pem", "r"))
 		
+		
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		
 		self._key = self._load_keys(str(ID)+"PrivateKey.pem")
-		print "key of client" + self_key
+		
+
+		
+		
 		
 		
 
@@ -102,14 +106,27 @@ class Client:
 		r_message = pickle.dumps(("REGISTER", self.ID, e_key))
 		enc_r_message = RSAWrapper.encrypt(r_message, self._BBB_key)
 		self.s.sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
-		reply = self.__receiveMessage()
-		if (reply == "True"):
-			print "Successfully registered"
-			return
-		else :
-			print "Registration not possible"
-			sys.exit(0)
-			return
+		
+		reply, addr = self.s.recvfrom(2048)
+		decMessage, signature = RSAWrapper.decrypt(reply, self._key)
+		u_message, signature = pickle.loads(decMessage)
+		validSignature = RSAWrapper.verify(u_message, signature, self._BBB_key)
+		if (validSignature):
+			if (u_message == "True"):
+				print "Successfully registered"
+				return
+			else:
+				print "Registration not possible"
+				sys.exit(0)
+				return
+		else: 
+			if (u_message == "True"):
+				print "Successfully registered"
+				return
+			else:
+				print "Registration not possible"
+				sys.exit(0)
+				return
 					
 
 	#######################################################################
