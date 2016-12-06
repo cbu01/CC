@@ -3,8 +3,6 @@ import socket
 import os
 import os.path
 import time
-import uuid
-import Common
 import RSAWrapper
 from Crypto.PublicKey import RSA
 import hashlib
@@ -95,7 +93,7 @@ class BigBrotherBank:
             return False
 
         self._client_public_keys[client_id] = client_public_key
-        self._balances_dict[client_id] = 0
+        self._balances_dict[client_id] = 10
         self._save_data_to_file()
         return client_id
 
@@ -116,7 +114,6 @@ class BigBrotherBank:
         return os.path.isfile(file_path)
 
     def _create_initial_data(self):
-        self._balances_dict = {Common.int_to_id(1): 10, Common.int_to_id(2): 10}
         self._save_data_to_file()
 
     def _generate_transaction_id(self):

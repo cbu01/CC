@@ -1,5 +1,4 @@
 import pickle, socket, os, sys
-import Common
 import RSAWrapper
 from Crypto.PublicKey import RSA
 
