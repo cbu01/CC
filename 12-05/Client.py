@@ -6,6 +6,7 @@ from Crypto.PublicKey import RSA
 
 class Client:
     def __init__(self, name):
+        self._global_client_register_name = "client_register.pickle"
         self.name = name
         self.BBBhost = "localhost"
         self.BBBport = 10555
@@ -108,6 +109,7 @@ class Client:
         if (validSignature):
             if (u_message != "False"):
                 print "Successfully registered"
+                self._add_client_to_global_client_register(u_message)
                 return u_message
             else:
                 print "Registration not possible"
@@ -118,6 +120,22 @@ class Client:
             return
 
     #######################################################################
+
+    def _add_client_to_global_client_register(self, client_id):
+        try:
+            global_client_dict = pickle.load(open(self._global_client_register_name, "rb"))
+        except:
+            global_client_dict = {}
+
+        global_client_dict[self.name] = client_id
+        pickle.dump(global_client_dict, open(self._global_client_register_name, "wb"))
+
+    def _get_client_id_from_global_name(self, client_name):
+        try:
+            global_client_dict = pickle.load(open(self._global_client_register_name, "rb"))
+            return global_client_dict[client_name]
+        except:
+            return ""
 
     def mainLoop(self):
         loop = True
