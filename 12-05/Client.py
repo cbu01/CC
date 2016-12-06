@@ -94,20 +94,20 @@ class Client:
 			file = open(key_file_name, "w+")
 			file.write(_key.exportKey('PEM'))
 			file.close()
-			self._register(_key.publickey())
+			self._register(_key.publickey(), _key)
 		else:
 			_key = RSA.importKey(open(key_file_name, "r"))
 
 		return _key
        
-	def _register(self, _public_key):
+	def _register(self, _public_key, client_private_key):
 		e_key = _public_key.exportKey()
-		r_message = pickle.dumps(("REGISTER", self.ID, e_key))
+		r_message = pickle.dumps(("REGISTER", "", e_key))
 		enc_r_message = RSAWrapper.encrypt(r_message, self._BBB_key)
 		self.s.sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
 		
 		reply, addr = self.s.recvfrom(2048)
-		decMessage, signature = RSAWrapper.decrypt(reply, self._key)
+		decMessage, signature = RSAWrapper.decrypt(reply, client_private_key)
 		u_message, signature = pickle.loads(decMessage)
 		validSignature = RSAWrapper.verify(u_message, signature, self._BBB_key)
 		if (validSignature):

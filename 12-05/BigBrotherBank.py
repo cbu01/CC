@@ -26,6 +26,17 @@ class BigBrotherBank:
         self._s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._s.bind((self._host,self._port))
 
+    def multipay(self, paying_amount_list, receiving_amount_list):
+        """ paying_amount_list is a list of (paying_client_id, amount, paying_client_signature)
+            receiving_amount_list is alist of (receiving_client_id, amount)"""
+
+        # TODO make sure every client exists in the system
+        # TODO make sure every paying account has enough balance
+        # TODO make sure the total paying amount and total receiving amounts are the same
+
+
+        pass
+
     def pay(self, id1, id2, amount):
         """ Returns a transaction id if id1 can transfer amount to id2.
             Returns False otherwise or if something went wrong """
@@ -133,7 +144,8 @@ class BigBrotherBank:
     
     def __sendMessage(self, message, receiver, receiverID):
         signature = RSAWrapper.sign(message, self._key)
-        receiver_Key = RSA.importKey(self._client_public_keys[receiverID])
+        receiver_string_key = self._client_public_keys[receiverID]
+        receiver_Key = RSA.importKey(receiver_string_key)
         p_s_message = pickle.dumps((message,signature))
         encMessage = RSAWrapper.encrypt(p_s_message, receiver_Key)
         self._s.sendto(encMessage, receiver)
@@ -178,8 +190,9 @@ class BigBrotherBank:
                 except ValueError:
                     self.__sendMessage(str(False), addr, senderID)
             elif message[0] == "REGISTER" and len(message) == 3:
-                success = self.register_client(message[2])
-                self.__sendMessage(str(success), addr, senderID)
+                senderID = self.register_client(message[2])
+                if  senderID:
+                    self.__sendMessage(str(True), addr, senderID)
             else:
                 self.__sendMessage(str(False), addr, senderID)
 
