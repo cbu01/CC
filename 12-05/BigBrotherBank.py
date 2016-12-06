@@ -72,7 +72,7 @@ class BigBrotherBank:
         if client_id in self._client_public_keys:
             # Client is already registered, not cool
             return False
-        self._client_public_keys[client_id] = client_public_key
+        self._client_public_keys[client_id] = client_public_key.importKey()
         self._save_data_to_file()
         return True
 

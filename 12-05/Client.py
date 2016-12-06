@@ -95,7 +95,8 @@ class Client:
 		return _key
        
 	def _register(self, _public_key):
-		r_message = pickle.dumps(("REGISTER", self.ID, _public_key))
+		e_key = _public_key.exportKey()
+		r_message = pickle.dumps(("REGISTER", self.ID, e_key))
 		enc_r_message = RSAWrapper.encrypt(r_message, self._BBB_key)
 		self.__sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
 		reply = self.__receiveMessage()
