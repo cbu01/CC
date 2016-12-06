@@ -28,14 +28,16 @@ class Client:
 
     def __receiveMessage(self):
         message, addr = self.s.recvfrom(2048)
-        decMessage, signature = RSAWrapper.decrypt(message, self._key)
+        decMessage = RSAWrapper.decrypt(message, self._key)
+        print "decMessage" + str(decMessage)
         u_message, signature = pickle.loads(decMessage)
+        print "picMessage" + str(u_message)
         validSignature = RSAWrapper.verify(u_message, signature, self._BBB_key)
         if (validSignature):
-            return decMessage
+            return u_message
         else:
             print "WARNING: Invalid Signature!!!"
-            return decMessage
+            return u_message
 
     #######################################################################
 
@@ -57,8 +59,9 @@ class Client:
                 else:
                     print "transaction successful with transaction ID: " + str(reply)
                     return
-        except ValueError as ex:
+        except ValueError as e:
             print "transaction not successful - enter amount as a number"
+            print e
             return
 
     def __query(self, id2, transactionID, amount):

@@ -44,19 +44,23 @@ class BigBrotherBank:
 
         amount = float(amount)
         if amount <= 0:
+            print "Attempt to pay a negative amount of money!"
             return False
 
         if id1 not in self._balances_dict:
             # Id1 does not exist in system
+            print "id1 is unknown"
             return False
 
         if id2 not in self._balances_dict:
+            print "id2 is unknown"
             # Id2 does not exist in system
             return False
 
         id1_balance = self._balances_dict[id1]
         if id1_balance < amount:
             # Id1 does not have the funds to transfer the money
+            print "not enough money to transfer"
             return False
 
         # Update the amounts
@@ -154,22 +158,31 @@ class BigBrotherBank:
 
     def __receiveMessage(self):
         message, addr = self._s.recvfrom(2048)
-        decMessage = RSAWrapper.decrypt(message, self._key)
-        if type(decMessage) != tuple: # then this is a key which is NOT signed
-            pMessage = pickle.loads(decMessage)
-            senderID = pMessage[1]
-            return pMessage, addr, senderID
+        decMessage = RSAWrapper.decrypt(message, self._key) # decrypt
+        picMessage = pickle.loads(decMessage) # pickle
+        print "decMessage " + str(decMessage)
+        print "picMessage" + str(picMessage)
+        print "picMessage type" + str(type(picMessage))
+        print "type of picMessage" + str(type(picMessage))
+        # check if this is a signed message (tuple) or a key (not a tuple)
+        if picMessage[0] == "REGISTER": # then this is a key which is NOT signed
+            senderID = picMessage[1]
+            print "receivedMessage1 " + str(picMessage) + " " + str(senderID)
+            return picMessage, addr, senderID
         else :
-            p_message, signature = pickle.loads(decMessage[0]) # extract message
-            u_message = pickle.loads(p_message)
-            senderID = u_message[1] # get id
-            sender_Key = self._client_public_keys[senderID]
-            validSignature = RSAWrapper.verify(p_message, signature, sender_Key)
+            command = picMessage[0]
+            signature = picMessage[1]
+            picCommand = pickle.loads(command) # unpack command
+            print "picCommand" + str(picCommand)
+            senderID = picCommand[1] # get id
+            sender_Key = RSA.importKey(self._client_public_keys[senderID]) # get key
+            validSignature = RSAWrapper.verify(command, signature, sender_Key)
             if (validSignature):
-                return u_message, addr, senderID
+                print "receivedMessage2 " + str(picCommand) + " " + str(senderID)
+                return picCommand, addr, senderID
             else: 
                 print "WARNING: Invalid Signature!!!"
-                return u_message, addr, senderID
+                return picCommand, addr, senderID
         
     ########################################################################
 
