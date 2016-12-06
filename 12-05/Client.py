@@ -107,7 +107,7 @@ class Client:
 		self.s.sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
 		
 		reply, addr = self.s.recvfrom(2048)
-		decMessage, signature = RSAWrapper.decrypt(reply, client_private_key)
+		decMessage = RSAWrapper.decrypt(reply, client_private_key)
 		u_message, signature = pickle.loads(decMessage)
 		validSignature = RSAWrapper.verify(u_message, signature, self._BBB_key)
 		if (validSignature):
