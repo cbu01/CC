@@ -21,7 +21,7 @@ class Client:
 
     def __sendMessage(self, message):
         signature = RSAWrapper.sign(message, self._key)
-        p_message = pickle.dumps(message, signature)
+        p_message = pickle.dumps((message, signature))
         encMessage = RSAWrapper.encrypt(p_message, self._BBB_key)
         self.s.sendto(encMessage, (self.BBBhost, self.BBBport))
         return
@@ -39,13 +39,16 @@ class Client:
 
     #######################################################################
 
-    def __pay(self, id2, amount):
+    def __pay(self, target_name, amount):
         try:
             a = float(amount)  # cast amount to float
             if (a <= 0):
                 print "transaction not successful - choose a positive amount of money"
             else:
-                message = pickle.dumps(("PAY", self.ID, Common.int_to_id(id2), a))
+                target_client_id = self._get_client_id_from_global_name(target_name)
+                if target_client_id == "":
+                    return
+                message = pickle.dumps(("PAY", self._ID, target_client_id, a))
                 self.__sendMessage(message)
                 reply = self.__receiveMessage()
                 if (reply == "False"):
@@ -54,14 +57,14 @@ class Client:
                 else:
                     print "transaction successful with transaction ID: " + str(reply)
                     return
-        except ValueError:
+        except ValueError as ex:
             print "transaction not successful - enter amount as a number"
             return
 
     def __query(self, id2, transactionID, amount):
         try:
             a = float(amount)  # cast amount to float
-            message = pickle.dumps(("QUERY", Common.int_to_id(id2), self.ID, Common.int_to_id(transactionID), amount))
+            message = pickle.dumps(("QUERY", Common.int_to_id(id2), self._ID, Common.int_to_id(transactionID), amount))
             self.__sendMessage(message)
             reply = self.__receiveMessage()
             if (reply == "True"):
