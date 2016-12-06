@@ -31,6 +31,10 @@ class BigBrotherBank:
             Returns False otherwise or if something went wrong """
         print "Got payment request from id1: {0}, id2:{1} and amount: {2}".format(id1, id2, amount)
 
+        amount = float(amount)
+        if amount <= 0:
+            return False
+
         if id1 not in self._balances_dict:
             # Id1 does not exist in system
             return False
