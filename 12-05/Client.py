@@ -15,6 +15,7 @@ class Client:
 		self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		
 		self._key = self._load_keys(str(ID)+"PrivateKey.pem")
+		print "key of client" + self_key
 		
 		
 
@@ -22,14 +23,16 @@ class Client:
 
 	def __sendMessage(self, message):
 		signature = RSAWrapper.sign(message, self._key)
-		encMessage = RSAWrapper.encrypt((message, signature), self._BBB_key)
+		p_message = pickle.dumps(message, signature)
+		encMessage = RSAWrapper.encrypt(p_message, self._BBB_key)
 		self.s.sendto(encMessage, (self.BBBhost, self.BBBport))
 		return
 
 	def __receiveMessage(self):
 		message, addr = self.s.recvfrom(2048)
 		decMessage, signature = RSAWrapper.decrypt(message, self._key)
-		validSignature = RSAWrapper.verify(decMessage, self._BBB_key)
+		u_message, signature = pickle.loads(decMessage)
+		validSignature = RSAWrapper.verify(u_message, signature, self._BBB_key)
 		if (validSignature):
 			return decMessage
 		else: 
@@ -98,7 +101,7 @@ class Client:
 		e_key = _public_key.exportKey()
 		r_message = pickle.dumps(("REGISTER", self.ID, e_key))
 		enc_r_message = RSAWrapper.encrypt(r_message, self._BBB_key)
-		self.__sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
+		self.s.sendto(enc_r_message,(self.BBBhost,self.BBBport)) # DON'T sign key!!!
 		reply = self.__receiveMessage()
 		if (reply == "True"):
 			print "Successfully registered"

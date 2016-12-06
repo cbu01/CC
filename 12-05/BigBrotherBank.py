@@ -72,7 +72,7 @@ class BigBrotherBank:
         if client_id in self._client_public_keys:
             # Client is already registered, not cool
             return False
-        self._client_public_keys[client_id] = client_public_key.importKey()
+        self._client_public_keys[client_id] = RSA.importKey(client_public_key)
         self._save_data_to_file()
         return True
 
@@ -120,9 +120,10 @@ class BigBrotherBank:
     #########################################################################
     
     def __sendMessage(self, message, receiver, receiverID):
-        signature = RSAWrapper.sibling(message, self._key)
-        #find key of receiver
-        encMessage = RSAWrapper.encrypt((message, signature), receiver_Key)
+        signature = RSAWrapper.sign(message, self._key)
+        receiver_Key = self._client_public_keys[receiverID]
+        p_s_message = pickle.dumps((message,signature))
+        encMessage = RSAWrapper.encrypt(p_s_message, receiver_Key)
         self._s.sendto(encMessage, receiver)
         return
 
@@ -134,22 +135,22 @@ class BigBrotherBank:
             senderID = pMessage[1]
             return pMessage, addr, senderID
         else :
-            message = pickle.loads(decMessage[0]) # extract message
-            signature = decMessage[1] # extract signature
-            senderID = message[1] # get id
-            #find key of sender
-            validSignature = RSAWrapper.verify(decMessage[0], decMessage[1], sender_Key)
+            p_message, signature = pickle.loads(decMessage[0]) # extract message
+            u_message = pickle.loads(p_message)
+            senderID = u_message[1] # get id
+            sender_Key = self._client_public_keys[senderID]
+            validSignature = RSAWrapper.verify(p_message, signature, sender_Key)
             if (validSignature):
-                return message, addr, senderID
+                return u_message, addr, senderID
             else: 
                 print "WARNING: Invalid Signature!!!"
-                return message, addr, senderID
+                return u_message, addr, senderID
         
     ########################################################################
 
     def Listen(self):
         while True:
-            data, addr, senderID = self.__receiveMessage()
+            message, addr, senderID = self.__receiveMessage()
             if message[0] == "PAY" and len(message) == 4:
                 try: 
                     a = message[3]

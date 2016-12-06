@@ -10,15 +10,28 @@ def keygen():
 	return key
 
 def encrypt(string, key):
+	newString = ""
+	while (len(string) >= 54):
+		stringToEncrypt = string[0:54]
+		cipher = PKCS1_OAEP.new(key)
+		enc = cipher.encrypt(stringToEncrypt)
+		newString = newString + enc
+		string = string[54:]
+	stringToEncrypt = string
 	cipher = PKCS1_OAEP.new(key)
-	print string
-	enc = cipher.encrypt(string)
-	return enc
+	enc = cipher.encrypt(stringToEncrypt)
+	newString = newString + enc
+	return newString
 
 def decrypt(string, key):
-	ciper = PKCS1_OAEP.new(key)
-	dec = ciper.decrypt(string)
-	return dec
+	newString = ""
+	while (len(string) > 0):
+		stringToDecrypt = string[0:128]
+		cipher = PKCS1_OAEP.new(key)
+		dec = cipher.decrypt(stringToDecrypt)
+		newString = newString + dec
+		string = string[128:]
+	return newString
 
 def sign(string, key):
 	hashValue = SHA.new(string)
