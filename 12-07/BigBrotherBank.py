@@ -25,16 +25,93 @@ class BigBrotherBank:
         self._s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._s.bind((self._host,self._port))
 
-    def multipay(self, paying_amount_list, receiving_amount_list):
-        """ paying_amount_list is a list of (paying_client_id, amount, paying_client_signature)
-            receiving_amount_list is alist of (receiving_client_id, amount)"""
+    def authorize(self, param_list):
 
-        # TODO make sure every client exists in the system
+        n = param_list[0]
+        m = param_list[1]
+        
+        paying_ids = [param_list[2+2*x] for x in range(n)]
+        paying_amounts = [param_list[3+2*x] for x in range(n)]
+        receiving_ids = [param_list[2+2*x+2*n] for x in range(m)]
+        receiving_amounts = [param_list[3+2*x+2*n] for x in range(m)]
+        signature_list = param_list[2+(2*n)+(2*m):]
+   
+        # TODO make sure every paying client exists in the system
+        sender_id_exists = all([(paying_ids[x] in self._client_public_keys) for x in range(n)])
+        if not(sender_id_exists):
+            print "sender id does not exist"
+            return None
+        # ensure that every receiving client exists
+        receiver_id_exists = all([(receiving_ids[x] in self._client_public_keys) for x in range(m)])
+        if not(receiver_id_exists):
+            print "receiver id does not exit"
+            return None
         # TODO make sure every paying account has enough balance
-        # TODO make sure the total paying amount and total receiving amounts are the same
+        enough_balance = all([(self._balances_dict[paying_ids[x]] >= paying_amounts[x] and paying_amounts[x] >= 0) for x in range(n)])
+        if not(enough_balance):
+            print "not enough money"
+            return None       
+        # make sure that the total paying amount is equal to the total receiving amounts    
+        total_amount_to_send = sum(paying_amounts)
+        total_amount_to_receive = sum(receiving_amounts)
+        if total_amount_to_send != total_amount_to_receive:
+            print "amounts to send and receive do not match"
+            return None
+        # check if all signatures are valid
+        # therefore I interpret all input values as strings
+        # assume id_x belongs to signature_x
+        list_without_signatures = param_list[:len(param_list)-len(signature_list)]
+        list_to_sign = "".join([str(list_without_signatures[x]) for x in range(len(list_without_signatures))])
+        
+        signatures_valid = all([RSAWrapper.verify(list_to_sign, signature_list[x], RSA.importKey(self._client_public_keys[paying_ids[x]])) for x in range(n)])
+        if not(signatures_valid):
+            print "signature not valid"
+            return None
+        else: 
+            for x in range(n):
+                self._balances_dict[paying_ids[x]] -= float(paying_amounts[x]) # withdraw money
+            for y in range(m):
+                self._balances_dict[receiving_ids[y]] += float(receiving_amounts[y]) # receive money
+            # Save the transaction
+            transaction_id = self._generate_transaction_id()
+            self._transactions_dict[transaction_id] = ((paying_ids, receiving_ids, paying_amounts, receiving_amounts, time.time()))
+            self._save_data_to_file()
 
+            return transaction_id
+        
+        
+        
 
-        pass
+    def verify(self, ID_out, x, transaction_ID):
+        try:
+            payment_information = self._transactions_dict[transaction_ID]
+            if (len(payment_information) == 5):
+                receiving_ids = payment_information[1]
+                receiving_amounts = payment_information[3]
+                number_of_receivements = receiving_ids.count(ID_out)
+                indices = []
+                for  n in range(number_of_receivements):
+                    i = receiving_ids.index(ID_out)
+                    receiving_ids.pop(i)
+                    indices.append(i)
+                for j in indices:
+                    if (receiving_amounts[j] == x):
+                        return True
+                return False
+            else:
+                receiving_id = payment_information[1]
+                receiving_amount = payment_information[2]
+                if (ID_out == receiving_id and x == receiving_amount):
+                    return True
+            return False
+        except ValueError:
+            return False
+                     
+            
+            
+        
+ 
+            
 
     def pay(self, id1, id2, amount):
         """ Returns a transaction id if id1 can transfer amount to id2.
@@ -211,6 +288,8 @@ class BigBrotherBank:
                     self.__sendMessage(senderID, addr, senderID)
             else:
                 self.__sendMessage(str(False), addr, senderID)
+                
+    #######################################################################
 
 
 if __name__ == "__main__":

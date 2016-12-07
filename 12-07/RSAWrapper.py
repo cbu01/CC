@@ -3,6 +3,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 from Crypto import Random
+import binascii
 
 def keygen():
 	keygenerator = Random.new().read
@@ -34,18 +35,25 @@ def decrypt(string, key):
 	return newString
 
 def sign(string, key):
-	hashValue = SHA.new(string)
+	binString = __turnStringToBin(string)
+	hashValue = SHA.new(binString)
 	signer = PKCS1_v1_5.new(key)
 	signature = signer.sign(hashValue)
 	return signature
 	
 def verify(string, signature, key):
-	hashValue = SHA.new(string)
+	binString = __turnStringToBin(string)
+	hashValue = SHA.new(binString)
 	verifier = PKCS1_v1_5.new(key)
 	if verifier.verify(hashValue, signature):
 		return True
 	else:
 		return False
+	
+ # turn a string into bin format without 0b         
+def __turnStringToBin(string):
+	b = bin(int(binascii.hexlify(string), 16))[2:]
+	return b
 	
 
 
