@@ -1,0 +1,16 @@
+Current code state
+
+
+- BBB can
+	- Register new clients
+	- Encrypts its communications
+	- Allows pay (1-1) and query
+	
+- CLIENTS
+	- Can register with the bank and receives a BBB ID
+	- Can pay 1-1 and query 
+	
+- MISSING
+	- No sane way to start the system. Every new account starts out with a fixed amount for testing
+	- Multi paying not supported
+	- Block chain not implemented
