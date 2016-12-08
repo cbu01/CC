@@ -1,9 +1,17 @@
 import RSAWrapper
 import hashlib
+import Common
 
 
 class Block:
     def __init__(self, block_payload, previous_block, previous_block_hash):
+        """
+
+        Args
+            :param block_payload (BlockPayload): block payload. See description in that class
+            :param previous_block (Block): The previous block
+            :param previous_block_hash (str): Hash value of the previous block
+        """
         self.previous_block_hash = previous_block_hash
         self.previous_block = previous_block
         self.block_payload = block_payload
@@ -38,18 +46,29 @@ class Block:
 
 
 class BlockPayload:
-    def __init__(self, str_message, message, signatures):
-        # TODO missing transaction id somewhere
+    def __init__(self,
+                 num_clients,
+                 list_of_client_ids,
+                 list_client_public_keys,
+                 list_of_tuples_containing_start_and_end_amounts_for_clients,
+                 list_of_signatures):
+
         """
-        Args:
-            str_message (str): A string representation of the message for easier signature comparison
-            message (list_of_tuples): Each tuple has the format:
-                (client_public_key(key_object) , starting_balance(float), ending_balance(float))
-            signatures (list): A list of signatures. This list has the same ordering as the messages.
+        :param num_clients: Number of clients
+        :param list_of_client_ids: List of client ids
+        :param list_of_tuples_containing_start_and_end_amounts_for_clients:
+            The list of start and end amounts in the same order as the list of clients
+        :param list_of_signatures:
+            List of signatures in the same order as the list of client ids
+            The signatures sign the concatenation of the bytes for n, ID1, ..., IDn, (end_1-start_1), ..., (end_n-start_n)
         """
-        self.str_message = str_message
-        self.message = message
-        self.signatures = signatures
+
+        self.list_of_client_ids = list_of_client_ids
+        self.list_of_signatures = list_of_signatures
+        self.starting_amounts = [x[0] for x in list_of_tuples_containing_start_and_end_amounts_for_clients]
+        self.ending_amounts = [x[1] for x in list_of_tuples_containing_start_and_end_amounts_for_clients]
+        self.list_client_public_keys = list_client_public_keys
+        self.num_clients = num_clients
 
     def verify_payload(self):
         signature_verified = self._verify_signatures()
@@ -69,12 +88,12 @@ class BlockPayload:
         Returns:
             bool: If all signatures match the hash of the message.
         """
-        for i in range(len(self.message)):
-            public_key = self.message[i][0]
-            signature = self.signatures[i]
+        for i in range(len(self.list_of_client_ids)):
+            public_key = self.list_client_public_keys[i]
+            signature = self.list_of_signatures[i]
             verified = RSAWrapper.verify(self.str_message, signature, public_key)
             if not verified:
-
+                print "Signature does not verify for public key " + str(public_key)
                 return False
 
         return True
@@ -85,12 +104,12 @@ class BlockPayload:
         Returns:
             bool: If starting and ending balances sum to same number
         """
-        list_of_input_balances = [x[1] for x in self.message]
-        input_sum = sum(list_of_input_balances)
-        list_of_output_balances = [x[2] for x in self.message]
-        output_sum = sum(list_of_output_balances)
         float_threshold = 0.0001
-        return abs(input_sum - output_sum) < float_threshold
+        return abs(self.starting_amounts - self.ending_amounts) < float_threshold
 
-    def __str__(self):
-        return self.str_message + ''.join(self.signatures)
+    def _message_to_sign(self):
+        return Common.transaction_signature_text(
+            self.num_clients,
+            self.list_of_client_ids,
+            self.starting_amounts,
+            self.ending_amounts)

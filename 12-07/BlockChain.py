@@ -1,5 +1,5 @@
 import pickle
-from Block import Block
+from Block import Block, BlockPayload
 
 
 class BlockChain:
@@ -15,19 +15,60 @@ class BlockChain:
 
     @staticmethod
     def first_block_chain_initialization(block_file_name, genesis_key, list_of_ids_to_split_genesis_dollars):
-        # TODO create the genesis block
+        # TODO read the Genesis block specs. Not right like this
         genesis_block = Block("I think it's ok that this is nonsense", None, "GENESIS_BLOCK_HASH")
 
         # TODO create the initial transfer block from the genesis block
         pass
 
-    def add_block(self, message, signatures):
+    def _get_last_end_amount_for_client(self, client_id):
+        curr_block = self.latest_block
+        while curr_block.previous_block is not None:
+            current_block_has_client = client_id in curr_block.block_payload.list_of_client_ids
+            if current_block_has_client:
+                client_index = curr_block.block_payload.list_of_client_ids.index(client_id)
+                client_latest_ending_balance = curr_block.block_payload.ending_amounts[client_index]
+                return client_latest_ending_balance
+
+            curr_block = curr_block.previous_block
+
+    def transaction_to_block(self, transaction):
+        previous_block = self.latest_block
+        previous_block_hash = self.latest_block.hash_value()
+
+        # TODO map from transaction to XXX fields
+        XXX = "asdf"
+        num_clients = XXX
+        list_of_client_ids = XXX
+        list_client_public_keys = XXX
+        list_of_tuples_containing_start_and_end_amounts_for_clients = XXX
+        list_of_signatures = XXX
+        block_payload = BlockPayload(num_clients,
+                                     list_of_client_ids,
+                                     list_client_public_keys,
+                                     list_of_tuples_containing_start_and_end_amounts_for_clients,
+                                     list_of_signatures)
+        block = Block(block_payload, previous_block, previous_block_hash)
+        return block
+
+    # TODO maybe merge this with the above method
+    def add_block(self, block):
         # TODO create block object
         # TODO map what I want the block to actually get
         new_block = None
         new_block_verified = new_block.verify_block()
         if new_block_verified:
-            # TODO check if the balances of all accounts in start_amount matches the previous ending_amounts
+            client_ids_in_transaction = new_block.block_payload.list_of_client_ids
+            clients_start_balance = new_block.block_payload.starting_amounts
+            for i in range(len(client_ids_in_transaction)):
+                client_id = client_ids_in_transaction[i]
+                client_start_balance = clients_start_balance[i]
+                client_previous_end_balance = self._get_last_end_amount_for_client(client_id)
+                clients_balance_checks = client_previous_end_balance is None or client_previous_end_balance == client_start_balance
+                if not clients_balance_checks:
+                    print "New block does not satisfy the start-end balance check"
+                    return False
+
             print "New block successfully verified and added"
             self.latest_block = new_block
             self._save_block_chain_to_file()
@@ -102,8 +143,8 @@ class BlockChainVerifier:
                 last_known_starting_balance = self.current_start_balances_of_accounts[client_id]
                 if abs(last_known_starting_balance - ending_balance) > float_threshold:
                     print "Account with ID {0} does not have matching start and end balances. " \
-                          "The start balance is {1} while the previously known end balance is {2}".format(client_id, last_known_starting_balance, ending_balance)
+                          "The start balance is {1} while the previously known end balance is {2}".format(client_id,
+                                                                                                          last_known_starting_balance,
+                                                                                                          ending_balance)
 
         return True
-
-
