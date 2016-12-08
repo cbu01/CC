@@ -1,3 +1,4 @@
+import hashlib
 
 def int_to_id(int_val):
     """ Takes an int and pads 0's in front of it to create a 32 char long string as id """
@@ -18,3 +19,9 @@ def transaction_signature_text(num_clients, list_of_client_ids, list_of_client_s
         message += str(end_balance - start_balance)
 
     return message
+
+
+def client_id_from_public_key(public_key):
+    hasher = hashlib.sha256()
+    hasher.update(public_key)
+    return hasher.digest()
