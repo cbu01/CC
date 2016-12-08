@@ -32,27 +32,47 @@ class BlockChain:
 
             curr_block = curr_block.previous_block
 
-    def transaction_to_block(self, transaction):
+    def add_block(self, num_clients,
+                  list_of_client_ids,
+                  list_client_public_keys,
+                  list_of_amount_changes,
+                  list_of_signatures):
         previous_block = self.latest_block
         previous_block_hash = self.latest_block.hash_value()
 
-        # TODO map from transaction to XXX fields
-        XXX = "asdf"
-        num_clients = XXX
-        list_of_client_ids = XXX
-        list_client_public_keys = XXX
-        list_of_tuples_containing_start_and_end_amounts_for_clients = XXX
-        list_of_signatures = XXX
+        list_of_tuples_containing_start_and_end_amounts_for_clients = []
+
+        for i in range(list_client_public_keys):
+            client_id = list_of_client_ids[i]
+            client_amount_change = list_of_amount_changes[i]
+            client_start_balance = self._get_last_end_amount_for_client(client_id)
+            has_enough_balance = client_start_balance > -client_amount_change
+            if not has_enough_balance:
+                print "Client with ID {0} only has a balance {1} but is trying to subtract {2}". format(client_id, client_start_balance, client_amount_change)
+                return False
+            client_end_balance = client_start_balance + client_amount_change
+            list_of_tuples_containing_start_and_end_amounts_for_clients.append((client_start_balance, client_end_balance))
+
         block_payload = BlockPayload(num_clients,
                                      list_of_client_ids,
                                      list_client_public_keys,
                                      list_of_tuples_containing_start_and_end_amounts_for_clients,
                                      list_of_signatures)
         block = Block(block_payload, previous_block, previous_block_hash)
-        return block
 
+        block_verified = block.verify_block()
+        if not block_verified:
+            print "Block not verified"
+            return False
+
+        self.latest_block = block
+        self._save_block_chain_to_file()
+
+        return True
+
+    """
     # TODO maybe merge this with the above method
-    def add_block(self, block):
+    def verify_block(self, block):
         # TODO create block object
         # TODO map what I want the block to actually get
         new_block = None
@@ -76,7 +96,7 @@ class BlockChain:
         else:
             print "Unable to verify new block"
             return False
-
+    """
     def audit(self):
         bcv = BlockChainVerifier()
         verified = bcv.verify_entire_block_chain(self.latest_block)
@@ -104,7 +124,7 @@ class BlockChainVerifier:
             client_ids_and_starting_balance = [(x[0], x[1]) for x in client_ids_starting_balance_ending_balance]
             self._update_last_known_starting_balances(client_ids_and_starting_balance)
 
-            # Access previous block and compare O with dict
+            # Access previous block and compare end with dict
             client_ids_starting_balance_ending_balance = current_block.previous_block.get_client_ids_starting_balance_ending_balance()
             client_ids_and_ending_balance = [(x[0], x[2]) for x in client_ids_starting_balance_ending_balance]
             previous_balances_check_out = self._check_previous_starting_balances(client_ids_and_ending_balance)

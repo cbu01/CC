@@ -7,10 +7,11 @@ import RSAWrapper
 from Crypto.PublicKey import RSA
 import hashlib
 import Common
+from BlockChain import BlockChain
 
 
 class BigBrotherBank:
-    def __init__(self, data_file_name):
+    def __init__(self, data_file_name, block_chain_file):
         self._key = self._load_keys("BBBPrivateKey.pem")
         self._client_public_keys = {}  # Stores {client_id, exported_client_public_key_that_needs_importing_to_work}
         self._data_file_name = data_file_name
@@ -20,6 +21,7 @@ class BigBrotherBank:
         self._load_data_from_file()
         self._host = "localhost"
         self._port = 10555
+        self._block_chain = BlockChain(block_chain_file)
        
 
         self._s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -77,10 +79,18 @@ class BigBrotherBank:
             self._transactions_dict[transaction_id] = ((paying_ids, receiving_ids, paying_amounts, receiving_amounts, time.time()))
             self._save_data_to_file()
 
+            num_clients = n + m
+            list_of_client_ids = paying_ids + receiving_ids
+            list_client_public_keys = [RSA.importKey(self._client_public_keys[client_id]) for client_id in list_of_client_ids]
+            list_of_amount_changes = paying_amounts + receiving_amounts
+
+            self._block_chain.add_block(
+                num_clients,
+                list_of_client_ids,
+                list_client_public_keys,
+                list_of_amount_changes,
+                signature_list)
             return transaction_id
-        
-        
-        
 
     def verify(self, ID_out, x, transaction_ID):
         try:
