@@ -1,5 +1,6 @@
 import pickle
 from Block import Block, BlockPayload
+import Common
 
 
 class BlockChain:
@@ -7,8 +8,12 @@ class BlockChain:
                  block_chain_file_name,
                  genesis_key,
                  initial_client_ids,
-                 initial_client_public_keys,
+                 initial_client_keys,
+                 initial_client_amounts
                  ):
+        self.initial_client_amounts = initial_client_amounts
+        self.initial_client_keys = initial_client_keys
+        self.initial_client_ids = initial_client_ids
         self.genesis_key = genesis_key
         self.block_chain_file_name = block_chain_file_name
         self.latest_block = None
@@ -19,13 +24,26 @@ class BlockChain:
     def _load_block_chain_from_file(self):
         self.latest_block = pickle.load(open(self.block_chain_file_name, "rb"))
 
-    def first_block_chain_initialization(self, genesis_key, list_of_ids_to_split_genesis_dollars):
-        # TODO read the Genesis block specs. Not right like this
+    def first_block_chain_initialization(self):
         genesis_block = Block("I think it's ok that this is nonsense", None, "17")
         self.latest_block = genesis_block
-        # TODO create the initial transfer block from the genesis block
-        self.add_block()
-        pass
+        # Create the initial transfer block from the genesis block
+        genesis_client_id = Common.client_id_from_public_key(self.genesis_key.publickey())
+        client_ids = []
+        client_ids.extend(self.initial_client_ids)
+        client_ids.insert(0, genesis_client_id)
+        num_clients = len(client_ids)
+        client_public_keys = [self.genesis_key.publickey()]
+        client_public_keys.extend([x.publickey() for x in self.initial_client_keys])
+
+        # TODO create the signatures
+        signatures = []
+
+        success = self.add_block(num_clients, client_ids, client_public_keys, self.initial_client_amounts, signatures)
+        if success:
+            print "Managed to create the first couple of blocks"
+            self._save_block_chain_to_file()
+
 
     def _get_last_end_amount_for_client(self, client_id):
         curr_block = self.latest_block
