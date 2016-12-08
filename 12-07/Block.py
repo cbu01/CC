@@ -91,7 +91,7 @@ class BlockPayload:
         for i in range(len(self.list_of_client_ids)):
             public_key = self.list_client_public_keys[i]
             signature = self.list_of_signatures[i]
-            verified = RSAWrapper.verify(self.str_message, signature, public_key)
+            verified = RSAWrapper.verify(self._message_to_sign(), signature, public_key)
             if not verified:
                 print "Signature does not verify for public key " + str(public_key)
                 return False

@@ -3,7 +3,13 @@ from Block import Block, BlockPayload
 
 
 class BlockChain:
-    def __init__(self, block_chain_file_name):
+    def __init__(self,
+                 block_chain_file_name,
+                 genesis_key,
+                 initial_client_ids,
+                 initial_client_public_keys,
+                 ):
+        self.genesis_key = genesis_key
         self.block_chain_file_name = block_chain_file_name
         self.latest_block = None
 
@@ -13,12 +19,12 @@ class BlockChain:
     def _load_block_chain_from_file(self):
         self.latest_block = pickle.load(open(self.block_chain_file_name, "rb"))
 
-    @staticmethod
-    def first_block_chain_initialization(block_file_name, genesis_key, list_of_ids_to_split_genesis_dollars):
+    def first_block_chain_initialization(self, genesis_key, list_of_ids_to_split_genesis_dollars):
         # TODO read the Genesis block specs. Not right like this
-        genesis_block = Block("I think it's ok that this is nonsense", None, "GENESIS_BLOCK_HASH")
-
+        genesis_block = Block("I think it's ok that this is nonsense", None, "17")
+        self.latest_block = genesis_block
         # TODO create the initial transfer block from the genesis block
+        self.add_block()
         pass
 
     def _get_last_end_amount_for_client(self, client_id):
