@@ -1,6 +1,7 @@
 import pickle
 from Block import Block, BlockPayload
 import Common
+import RSAWrapper
 
 
 class BlockChain:
@@ -36,14 +37,16 @@ class BlockChain:
         client_public_keys = [self.genesis_key.publickey()]
         client_public_keys.extend([x.publickey() for x in self.initial_client_keys])
 
-        # TODO create the signatures
-        signatures = []
+        start_balances = [0 for x in client_ids]
+        end_balances = self.initial_client_amounts
+
+        signature_message_text = Common.transaction_signature_text(num_clients, client_ids, start_balances, end_balances)
+        signatures = [RSAWrapper.sign(signature_message_text, key) for key in self.initial_client_keys]
 
         success = self.add_block(num_clients, client_ids, client_public_keys, self.initial_client_amounts, signatures)
         if success:
             print "Managed to create the first couple of blocks"
             self._save_block_chain_to_file()
-
 
     def _get_last_end_amount_for_client(self, client_id):
         curr_block = self.latest_block
