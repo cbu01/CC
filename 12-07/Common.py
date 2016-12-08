@@ -13,7 +13,7 @@ def transaction_signature_text(num_clients, list_of_client_ids, list_of_client_s
     for client_id in list_of_client_ids:
         message += str(client_id)
 
-    for i in range(list_of_client_start_balances):
+    for i in range(len(list_of_client_start_balances)):
         start_balance = list_of_client_start_balances[i]
         end_balance = list_of_client_end_balances[i]
         message += str(end_balance - start_balance)
@@ -23,5 +23,5 @@ def transaction_signature_text(num_clients, list_of_client_ids, list_of_client_s
 
 def client_id_from_public_key(public_key):
     hasher = hashlib.sha256()
-    hasher.update(public_key)
+    hasher.update(public_key.exportKey('PEM'))
     return hasher.digest()

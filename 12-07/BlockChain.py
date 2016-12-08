@@ -10,40 +10,67 @@ class BlockChain:
                  genesis_key,
                  initial_client_ids,
                  initial_client_keys,
-                 initial_client_amounts
-                 ):
+                 initial_client_amounts,
+                 genesis_init_balance=1000000,
+                 load_blockchain_from_file=True):
+
+        self.genesis_init_balance = genesis_init_balance
         self.initial_client_amounts = initial_client_amounts
         self.initial_client_keys = initial_client_keys
         self.initial_client_ids = initial_client_ids
         self.genesis_key = genesis_key
+        self.genesis_client_id = Common.client_id_from_public_key(self.genesis_key.publickey())
         self.block_chain_file_name = block_chain_file_name
         self.latest_block = None
+        if load_blockchain_from_file:
+            loaded = self._load_block_chain_from_file()
+            if not loaded:
+                self.first_block_chain_initialization()
 
     def _save_block_chain_to_file(self):
-        pickle.dump(self.latest_block, open(self.block_chain_file_name, "wb"))
+        pickle.dump((self.latest_block, self.genesis_client_id, self.genesis_init_balance), open(self.block_chain_file_name, "wb"))
 
     def _load_block_chain_from_file(self):
-        self.latest_block = pickle.load(open(self.block_chain_file_name, "rb"))
+        try:
+            self.latest_block, self.genesis_client_id, self.genesis_init_balance = pickle.load(open(self.block_chain_file_name, "rb"))
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def load_from_file(block_chain_file_name):
+        # This function is used by clients to load the bc
+        latest_block, genesis_client_id, genesis_init_balance = pickle.load(open(block_chain_file_name, "rb"))
+        BlockChain(block_chain_file_name, )
+        pass
 
     def first_block_chain_initialization(self):
-        genesis_block = Block("I think it's ok that this is nonsense", None, "17")
+        genesis_block = Block((self.genesis_client_id, self.genesis_init_balance), None, "17")
         self.latest_block = genesis_block
         # Create the initial transfer block from the genesis block
-        genesis_client_id = Common.client_id_from_public_key(self.genesis_key.publickey())
         client_ids = []
         client_ids.extend(self.initial_client_ids)
-        client_ids.insert(0, genesis_client_id)
+        client_ids.insert(0, self.genesis_client_id)
         num_clients = len(client_ids)
-        client_public_keys = [self.genesis_key.publickey()]
-        client_public_keys.extend([x.publickey() for x in self.initial_client_keys])
 
-        start_balances = [0 for x in client_ids]
-        end_balances = self.initial_client_amounts
+        client_keys = [self.genesis_key]
+        client_keys.extend(self.initial_client_keys)
+
+        client_public_keys = [x.publickey() for x in client_keys]
+
+        start_balances = [self.genesis_init_balance]
+        start_balances.extend([0 for x in client_ids[1:]])
+        genesis_end_balance = self.genesis_init_balance - sum(self.initial_client_amounts)
+        end_balances = [genesis_end_balance]
+        end_balances.extend(self.initial_client_amounts)
 
         signature_message_text = Common.transaction_signature_text(num_clients, client_ids, start_balances, end_balances)
-        signatures = [RSAWrapper.sign(signature_message_text, key) for key in self.initial_client_keys]
+        signatures = [RSAWrapper.sign(signature_message_text, key) for key in client_keys]
 
-        success = self.add_block(num_clients, client_ids, client_public_keys, self.initial_client_amounts, signatures)
+        amount_changes_list = [genesis_end_balance - self.genesis_init_balance]
+        amount_changes_list.extend(self.initial_client_amounts)
+
+        success = self.add_block(num_clients, client_ids, client_public_keys, amount_changes_list, signatures)
         if success:
             print "Managed to create the first couple of blocks"
             self._save_block_chain_to_file()
@@ -59,6 +86,17 @@ class BlockChain:
 
             curr_block = curr_block.previous_block
 
+        # Check for the genesis block.
+        try:
+            is_genesis_block = curr_block.block_payload[0] == client_id
+            if is_genesis_block:
+                genesis_init_amount = curr_block.block_payload[1]
+                return genesis_init_amount
+        except:
+            pass
+
+        return 0
+
     def add_block(self, num_clients,
                   list_of_client_ids,
                   list_client_public_keys,
@@ -69,7 +107,7 @@ class BlockChain:
 
         list_of_tuples_containing_start_and_end_amounts_for_clients = []
 
-        for i in range(list_client_public_keys):
+        for i in range(len(list_client_public_keys)):
             client_id = list_of_client_ids[i]
             client_amount_change = list_of_amount_changes[i]
             client_start_balance = self._get_last_end_amount_for_client(client_id)
