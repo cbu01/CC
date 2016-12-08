@@ -1,23 +1,23 @@
 import pickle
+from Block import Block
 
 
 class BlockChain:
-    def __init__(self, block_file_name):
-        self.block_file_name = block_file_name
+    def __init__(self, block_chain_file_name):
+        self.block_chain_file_name = block_chain_file_name
         self.latest_block = None
 
-        self._load_block_chain_from_file()
-
     def _save_block_chain_to_file(self):
-        pickle.dump(self, open(self.block_file_name, "wb"))
+        pickle.dump(self.latest_block, open(self.block_chain_file_name, "wb"))
 
-    @staticmethod
-    def _load_block_chain_from_file(block_file_name):
-        return pickle.load(open(block_file_name, "rb"))
+    def _load_block_chain_from_file(self):
+        self.latest_block = pickle.load(open(self.block_chain_file_name, "rb"))
 
     @staticmethod
     def first_block_chain_initialization(block_file_name, genesis_key, list_of_ids_to_split_genesis_dollars):
         # TODO create the genesis block
+        genesis_block = Block("I think it's ok that this is nonsense", None, "GENESIS_BLOCK_HASH")
+
         # TODO create the initial transfer block from the genesis block
         pass
 
