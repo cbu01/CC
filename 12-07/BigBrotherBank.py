@@ -175,7 +175,7 @@ class BigBrotherBank:
         return False
 
     def register_client(self, client_public_key):
-        client_id = self._generate_client_id(client_public_key)
+        client_id = Common.client_id_from_public_key(client_public_key)
         if client_id in self._client_public_keys:
             # Client is already registered, not cool
             return False
@@ -208,11 +208,6 @@ class BigBrotherBank:
         self._next_transaction_int_id += 1
         return Common.int_to_id(self._next_transaction_int_id)
         #return uuid.uuid4().hex
-
-    def _generate_client_id(self, client_public_key):
-        hasher = hashlib.sha256()
-        hasher.update(client_public_key)
-        return hasher.digest()
 
     def _load_keys(self, key_file_name):
         key_file_exists = self._data_file_exists(key_file_name)
