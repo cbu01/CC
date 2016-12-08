@@ -105,7 +105,7 @@ class BlockPayload:
             bool: If starting and ending balances sum to same number
         """
         float_threshold = 0.0001
-        return abs(self.starting_amounts - self.ending_amounts) < float_threshold
+        return abs(sum(self.starting_amounts) - sum(self.ending_amounts)) < float_threshold
 
     def _message_to_sign(self):
         return Common.transaction_signature_text(
