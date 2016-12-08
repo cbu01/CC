@@ -27,6 +27,7 @@ class BlockChain:
         new_block = None
         new_block_verified = new_block.verify_block()
         if new_block_verified:
+            # TODO check if the balances of all accounts in start_amount matches the previous ending_amounts
             print "New block successfully verified and added"
             self.latest_block = new_block
             self._save_block_chain_to_file()
@@ -35,7 +36,7 @@ class BlockChain:
             print "Unable to verify new block"
             return False
 
-    def verify_block_chain(self):
+    def audit(self):
         bcv = BlockChainVerifier()
         verified = bcv.verify_entire_block_chain(self.latest_block)
         if not verified:
