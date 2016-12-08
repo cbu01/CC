@@ -19,7 +19,8 @@ class BlockChain:
         self.initial_client_keys = initial_client_keys
         self.initial_client_ids = initial_client_ids
         self.genesis_key = genesis_key
-        self.genesis_client_id = Common.client_id_from_public_key(self.genesis_key.publickey())
+        if genesis_key != "":
+            self.genesis_client_id = Common.client_id_from_public_key(self.genesis_key.publickey())
         self.block_chain_file_name = block_chain_file_name
         self.latest_block = None
         if load_blockchain_from_file:
@@ -41,8 +42,10 @@ class BlockChain:
     def load_from_file(block_chain_file_name):
         # This function is used by clients to load the bc
         latest_block, genesis_client_id, genesis_init_balance = pickle.load(open(block_chain_file_name, "rb"))
-        BlockChain(block_chain_file_name, )
-        pass
+        block_chain = BlockChain(block_chain_file_name, "", [], [],[], genesis_init_balance, False)
+        block_chain.latest_block = latest_block
+        block_chain.genesis_client_id = genesis_client_id
+        return block_chain
 
     def first_block_chain_initialization(self):
         genesis_block = Block((self.genesis_client_id, self.genesis_init_balance), None, "17")
