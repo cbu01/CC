@@ -26,7 +26,7 @@ class listeningThread (threading.Thread):
             # listen for new messages
             data, addr = self.sock.recvfrom(2048)
             # check if it is a new client
-            if (addr == (self.register_ip, self.register_port)):
+            if (addr == (register_ip, register_port)):
                 client_dict_lock.acquire()
                 client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
                 client_dict_lock.release()
