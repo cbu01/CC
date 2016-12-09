@@ -86,7 +86,7 @@ def startClient(IP, PORT, client_name):
     central_register_port = 10555
       
     key = RSAWrapper.keygen()
-    pub_key = key.publicKey()
+    pub_key = key.publickey()
     ID = Common.client_id_from_public_key(pub_key)
      
     client_dict[ID] = ((central_register_ip, central_register_port), pub_key)
