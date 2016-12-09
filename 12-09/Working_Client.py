@@ -17,21 +17,18 @@ class Working_Client:
                 
                 # check if it is a new client
                 if (addr == (self.register_ip, self.register_port)):
-                    client_dict_lock.aquire
-                    client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
-                    client_dict_lock.release
+                    self.client_dict_lock.aquire
+                    self.client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
+                    self.client_dict_lock.release
                 else:
-                # check if received suffix is correct
+                    # check if received suffix is correct
         
-                # if suffix is correct:
+                    # if suffix is correct:
         
-                # add block to blockchain
+                        # add block to blockchain
         
-                # hand over parameter to calculation threads
-        
-        
-                # restart this loop
-        
+                    # update prefix
+            
         
         
     class calculationThread(threading.Thread):
@@ -46,12 +43,14 @@ class Working_Client:
 
                     # calc suffix
                     # if successful: send suffix to yourself and all other known clients
-                    # check if result is ok - necessary because i don't block the prefix while it is updated
-                    # this may end in a inconsistent condition
-                    client_dict_lock.aquire
-                    for c in client_dict:
-                        sock.sendto(suffix, client_dict[c][0])
-                    client_dict_lock.release
+                    
+                        # check if result is ok - necessary because i don't block the prefix while it is updated
+                        # this may end in a inconsistent condition
+                    
+                            self.client_dict_lock.aquire
+                            for c in client_dict:
+                                sock.sendto(suffix, client_dict[c][0])
+                            self.client_dict_lock.release
  
     def __init__(self, IP, PORT):
     
@@ -73,7 +72,7 @@ class Working_Client:
         self.client_dict[self.ID] = ((self.central_register_ip, self.central_register_port), self.pub_key)
         self.sock.sendto(self.ID, (self.central_register_ip, self.central_register_port), self.pub_key.exportKey) 
         
-        client_dict_lock = threading.Lock()
+        self.client_dict_lock = threading.Lock()
 
         self.listen = self.listeningThread(1, "Listening_Thread", self.sock)
         self.calc_1 = self.calculationThread(2, "Calculation_Thread", self.sock)
