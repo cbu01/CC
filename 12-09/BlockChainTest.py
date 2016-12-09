@@ -1,6 +1,7 @@
 from BlockChain import BlockChain
 from Block import Block
 import time
+import ProofOfWork
 
 
 def run_sanity_test():
@@ -36,15 +37,10 @@ def run_sanity_test():
 
 
 def set_nonce(block):
-    nonce_counter = 1
     while True:
-        nonce = str(nonce_counter)
-        # print "Trying nonce " + nonce
-        block.set_nonce(nonce)
-        if block.has_valid_hash_value():
+        nonce_found = ProofOfWork.try_to_set_correct_nonce(block)
+        if nonce_found:
             return
-        nonce_counter += 1
-
 
 def run_illegal_hash_value_block_test():
     hash_difficulty_value = 15
