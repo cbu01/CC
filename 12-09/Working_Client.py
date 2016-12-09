@@ -31,7 +31,7 @@ class listeningThread (threading.Thread):
                 client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
                 client_dict_lock.release()
             else:
-                deserialized_block = pickle.loads(data[0], 'rb')
+                deserialized_block = pickle.loads(data[0])
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
                 if new_block_verified:
                     self.block_chain.add_block(deserialized_block)
@@ -60,7 +60,7 @@ class calculationThread(threading.Thread):
                                                                                                  self.client_name, )
                         # Broadcast the block
                         client_dict_lock.acquire()
-                        serialized_block = pickle.dumps(self.block, 'wb')
+                        serialized_block = pickle.dumps(self.block)
                         for c in client_dict:
                             sock.sendto(serialized_block, client_dict[c][0])
                         client_dict_lock.release()
