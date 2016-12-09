@@ -48,30 +48,30 @@ class calculationThread(threading.Thread):
         self.block = block_without_nonce
         self.next_block_found_by_someone = False
 
-        def run(self):
-            print "calculationThread is active"
-            while True:
-                for i in range(1000):
-                    found_nonce = ProofOfWork.try_to_set_correct_nonce(self.block)
-                    if found_nonce:
-                        # Check if somebody else already found the next block
-                        if not self.next_block_found_by_someone:
-                            print "Thread {0} from client {1} found a nonce and thinks its the first one !".format(self.threadID,
-                                                                                                     self.client_name, )
-                            # Broadcast the block
-                            self.client_dict_lock.aquire
-                            serialized_block = pickle.dumps(self.block, 'wb')
-                            for c in self.client_dict:
-                                sock.sendto(serialized_block, self.client_dict[c][0])
-                            self.client_dict_lock.release
-                            self.update_block()
-                            continue
-                        else:
-                            # Found a block but someone was faster :(
-                            print "Thread {0} from client {1} found a nonce but was too slow".format(self.threadID, self.client_name)
-                            self.update_block()
-                            continue
-                self.update_block()
+    def run(self):
+        print "calculationThread is active"
+        while True:
+            for i in range(1000):
+                found_nonce = ProofOfWork.try_to_set_correct_nonce(self.block)
+                if found_nonce:
+                    # Check if somebody else already found the next block
+                    if not self.next_block_found_by_someone:
+                        print "Thread {0} from client {1} found a nonce and thinks its the first one !".format(self.threadID,
+                                                                                                 self.client_name, )
+                        # Broadcast the block
+                        self.client_dict_lock.aquire
+                        serialized_block = pickle.dumps(self.block, 'wb')
+                        for c in self.client_dict:
+                            sock.sendto(serialized_block, self.client_dict[c][0])
+                        self.client_dict_lock.release
+                        self.update_block()
+                        continue
+                    else:
+                        # Found a block but someone was faster :(
+                        print "Thread {0} from client {1} found a nonce but was too slow".format(self.threadID, self.client_name)
+                        self.update_block()
+                        continue
+            self.update_block()
 
     def update_block(self):
         # TODO
