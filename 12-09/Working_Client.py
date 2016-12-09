@@ -7,13 +7,13 @@ import time
 import pickle
 from Crypto.PublicKey import RSA
 import Common
-
-
+import Queue
 
 
 class listeningThread (threading.Thread):
-    def __init__(self, threadID, name, sock, block_chain):
+    def __init__(self, threadID, name, sock, block_chain, block_update_queues):
         threading.Thread.__init__(self)
+        self.block_update_queues = block_update_queues
         self.block_chain = block_chain
         self.sock = sock
         self.threadID = threadID
@@ -24,7 +24,7 @@ class listeningThread (threading.Thread):
         while True:
     
             # listen for new messages
-            data, addr = self.sock.recvfrom(2048)
+            data, addr = self.sock.recvfrom(4096)
             # check if it is a new client
             if addr == (central_register_ip, central_register_port):
                 client_dict_lock.acquire()
@@ -35,18 +35,22 @@ class listeningThread (threading.Thread):
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
                 if new_block_verified:
                     self.block_chain.add_block(deserialized_block)
-
-                # TODO somehow update the blocks of all calculations threads
+                    print "Block number {0} was added to the block chain".format(str(deserialized_block.get_counter()))
+                    for queue in self.block_update_queues:
+                        next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
+                        queue.put(next_block)
+                else:
+                    print "Got a proposed new block but it did not verify"
         
 
 class calculationThread(threading.Thread):
-    def __init__(self, threadID, name, sock, block_without_nonce, client_name):
+    def __init__(self, threadID, name, sock, block_without_nonce, client_name, block_update_queue):
         threading.Thread.__init__(self)
+        self.block_update_queue = block_update_queue
         self.client_name = client_name
         self.threadID = threadID
         self.name = name
         self.block = block_without_nonce
-        self.next_block_found_by_someone = False
 
     def run(self):
         print "calculationThread is active"
@@ -55,7 +59,8 @@ class calculationThread(threading.Thread):
                 found_nonce = ProofOfWork.try_to_set_correct_nonce(self.block)
                 if found_nonce:
                     # Check if somebody else already found the next block
-                    if not self.next_block_found_by_someone:
+                    someone_already_found_block = not self.block_update_queue.empty()
+                    if not someone_already_found_block:
                         print "Thread {0} from client {1} found a nonce and thinks its the first one !".format(self.threadID,
                                                                                                  self.client_name, )
                         # Broadcast the block
@@ -74,9 +79,9 @@ class calculationThread(threading.Thread):
             self.update_block()
 
     def update_block(self):
-        # TODO
-        pass
-
+        if not self.block_update_queue.empty():
+            self.block = self.block_update_queue.get()
+            self.block.data = self.client_name
 
 
 def create_next_block(block_chain, client_name):
@@ -116,10 +121,15 @@ block_chain = BlockChain()
 block_without_nonce1 = create_next_block(block_chain, client_name)
 block_without_nonce2 = create_next_block(block_chain, client_name)
 block_without_nonce3 = create_next_block(block_chain, client_name)
-listen = listeningThread(1, "Listening_Thread", sock, block_chain)
-calc_1 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce1, client_name)
-calc_2 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce2, client_name)
-calc_3 = calculationThread(4, "Calculation_Thread", sock, block_without_nonce3, client_name)
+
+queue1 = Queue.Queue()
+queue2 = Queue.Queue()
+queue3 = Queue.Queue()
+
+listen = listeningThread(1, "Listening_Thread", sock, block_chain, [queue1, queue2, queue3])
+calc_1 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce1, client_name, queue1)
+calc_2 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce2, client_name, queue2)
+calc_3 = calculationThread(4, "Calculation_Thread", sock, block_without_nonce3, client_name, queue3)
 listen.start()
 calc_1.start()
 calc_2.start()
