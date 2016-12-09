@@ -40,8 +40,9 @@ class Working_Client:
         
         
     class calculationThread(threading.Thread):
-        def __init__(self, threadID, name, sock, block_without_nonce):
+        def __init__(self, threadID, name, sock, block_without_nonce, client_name):
             threading.Thread.__init__(self)
+            self.client_name = client_name
             self.threadID = threadID
             self.name = name
             self.block = block_without_nonce
@@ -54,6 +55,8 @@ class Working_Client:
                         if found_nonce:
                             # Check if somebody else already found the next block
                             if not self.next_block_found_by_someone:
+                                print "Thread {0} from client {1} found a nonce and thinks its the first one !".format(self.threadID,
+                                                                                                         self.client_name, )
                                 # Broadcast the block
                                 self.client_dict_lock.aquire
                                 serialized_block = pickle.dumps(self.block, 'wb')
@@ -64,6 +67,7 @@ class Working_Client:
                                 continue
                             else:
                                 # Found a block but someone was faster :(
+                                print "Thread {0} from client {1} found a nonce but was too slow".format(self.threadID, self.client_name)
                                 self.update_block()
                                 continue
                     self.update_block()
