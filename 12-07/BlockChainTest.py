@@ -14,3 +14,7 @@ bc = BlockChain(block_chain_name,
                 client_ids,
                 client_keys,
                 client_amounts)
+
+
+# TODO try adding a fake transaction to the bc
+# TODO run the verify the bc audit function

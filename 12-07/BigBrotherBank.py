@@ -21,6 +21,8 @@ class BigBrotherBank:
         self._load_data_from_file()
         self._host = "localhost"
         self._port = 10555
+
+        # TODO missing block chain parameters
         self._block_chain = BlockChain(block_chain_file)
        
 
