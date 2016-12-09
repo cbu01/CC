@@ -17,7 +17,7 @@ while True:
     
     unpickled_data = pickle.loads(data)
         
-    if not clients.contains(unpickled_data):
+    if not unpickled_data in clients:
     
         for c in clients:
             sock.sendto(data,(c[1]))
