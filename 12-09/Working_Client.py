@@ -66,7 +66,8 @@ class Working_Client:
         self.central_register_port = 10555
         
         self.key = RSAWrapper.keygen()
-        self.ID = 
+        self.pub_key = self.key.publicKey()
+        self.ID = createHash(self.pub_key)
         
         self.sock.sendto() 
 
