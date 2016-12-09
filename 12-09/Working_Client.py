@@ -1,5 +1,9 @@
 import threading, socket
 import RSAWrapper
+import ProofOfWork
+from BlockChain import BlockChain
+from Block import Block
+import time
 
 class Working_Client:
 
@@ -32,27 +36,45 @@ class Working_Client:
         
         
     class calculationThread(threading.Thread):
-        def __init__(self, threadID, name, sock):
+        def __init__(self, threadID, name, sock, block_without_nonce):
             threading.Thread.__init__(self)
             self.threadID = threadID
             self.name = name
+            self.block = block_without_nonce
+            self.next_block_found_by_someone = False
             
             def run(self):
-        
                 while True:
+                    for i in range(1000):
+                        found_nonce = ProofOfWork.try_to_set_correct_nonce(self.block)
+                        if found_nonce:
+                            # Check if somebody else already found the next block
+                            if not self.next_block_found_by_someone:
+                                # Broadcast the block
+                                self.client_dict_lock.aquire
+                                for c in self.client_dict:
+                                    # TODO should pickle the block before sending it. Unpickle it on the other side
+                                    sock.sendto(self.block, self.client_dict[c][0])
+                                self.client_dict_lock.release
+                                self.update_block()
+                                continue
+                            else:
+                                # Found a block but someone was faster :(
+                                self.update_block()
+                                continue
+                    self.update_block()
 
                     # calc suffix
                     # if successful: send suffix to yourself and all other known clients
                     
                         # check if result is ok - necessary because i don't block the prefix while it is updated
                         # this may end in a inconsistent condition
-                    
-                            self.client_dict_lock.aquire
-                            for c in client_dict:
-                                sock.sendto(suffix, client_dict[c][0])
-                            self.client_dict_lock.release
- 
-    def __init__(self, IP, PORT):
+
+            def update_block(self):
+                # TODO
+                pass
+
+    def __init__(self, IP, PORT, client_name):
     
         self.IP = IP
         self.UDP_PORT = PORT
@@ -74,12 +96,32 @@ class Working_Client:
         
         self.client_dict_lock = threading.Lock()
 
-        self.listen = self.listeningThread(1, "Listening_Thread", self.sock)
-        self.calc_1 = self.calculationThread(2, "Calculation_Thread", self.sock)
-        self.calc_2 = self.calculationThread(3, "Calculation_Thread", self.sock)
-        self.calc_3 = self.calculationThread(4, "Calculation_Thread", self.sock)
+        block_chain = BlockChain()
+        block_without_nonce = self.create_first_block_without_nonce(block_chain, client_name)
+
+        self.listen = self.listeningThread(1, "Listening_Thread", self.sock, block_without_nonce)
+        self.calc_1 = self.calculationThread(2, "Calculation_Thread", self.sock, block_without_nonce)
+        self.calc_2 = self.calculationThread(3, "Calculation_Thread", self.sock, block_without_nonce)
+        self.calc_3 = self.calculationThread(4, "Calculation_Thread", self.sock, block_without_nonce)
 
         self.listen.start()
         self.calc_1.start()
         self.calc_2.start()
         self.calc_3.start()
+
+
+    def create_first_block_without_nonce(self, block_chain, client_name):
+        prev_block = block_chain.get_latest_block()
+        timestamp = int(time.time())
+        data = client_name
+        new_counter = prev_block.get_counter() + 1
+        hash_difficulty_value = 15
+
+        block = Block(prev_block,
+                      prev_block.get_hash_value(),
+                      timestamp,
+                      data,
+                      new_counter,
+                      hash_difficulty_value)
+
+        return block
