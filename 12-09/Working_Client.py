@@ -92,7 +92,7 @@ HOST = "localhost"
 PORT = 15000
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind((IP, PORT)) 
+sock.bind((HOST, PORT)) 
         
 client_dict = {}
        
