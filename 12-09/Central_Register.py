@@ -1,11 +1,9 @@
 import socket
-import startupBBB
+#import startupBBB
 
-IP = IP
-UDP_PORT = PORT
 
-sock = socket.socket(socket.AF_INT, socket.SOCK_DGRAM)
-sock.bind((self.IP, self.UDP_PORT))
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(("localhost", 10555))
 
 #startupBBB.cleandir() # clean directory from '.pem' and '.pickle' files
 
