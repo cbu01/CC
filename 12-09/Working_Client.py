@@ -27,9 +27,9 @@ class listeningThread (threading.Thread):
             data, addr = self.sock.recvfrom(2048)
             # check if it is a new client
             if (addr == (self.register_ip, self.register_port)):
-                self.client_dict_lock.aquire
-                self.client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
-                self.client_dict_lock.release
+                client_dict_lock.aquire
+                client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
+                client_dict_lock.release
             else:
                 deserialized_block = pickle.loads(data[0], 'rb')
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
@@ -59,11 +59,11 @@ class calculationThread(threading.Thread):
                         print "Thread {0} from client {1} found a nonce and thinks its the first one !".format(self.threadID,
                                                                                                  self.client_name, )
                         # Broadcast the block
-                        self.client_dict_lock.aquire
+                        client_dict_lock.aquire
                         serialized_block = pickle.dumps(self.block, 'wb')
-                        for c in self.client_dict:
-                            sock.sendto(serialized_block, self.client_dict[c][0])
-                        self.client_dict_lock.release
+                        for c in client_dict:
+                            sock.sendto(serialized_block, client_dict[c][0])
+                        client_dict_lock.release
                         self.update_block()
                         continue
                     else:
