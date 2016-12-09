@@ -26,12 +26,12 @@ class listeningThread (threading.Thread):
             # listen for new messages
             data, addr = self.sock.recvfrom(2048)
             # check if it is a new client
-            if (addr == (register_ip, register_port)):
+            if addr == (central_register_ip, central_register_port):
                 client_dict_lock.acquire()
                 client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
                 client_dict_lock.release()
             else:
-                deserialized_block = pickle.loads(data[0])
+                deserialized_block = pickle.loads(data)
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
                 if new_block_verified:
                     self.block_chain.add_block(deserialized_block)
