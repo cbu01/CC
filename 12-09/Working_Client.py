@@ -20,6 +20,7 @@ class listeningThread (threading.Thread):
         self.name = name
       
     def run(self):
+        print "listeningThread is active"
         while True:
     
             # listen for new messages
@@ -48,6 +49,7 @@ class calculationThread(threading.Thread):
         self.next_block_found_by_someone = False
 
         def run(self):
+            print "calculationThread is active"
             while True:
                 for i in range(1000):
                     found_nonce = ProofOfWork.try_to_set_correct_nonce(self.block)

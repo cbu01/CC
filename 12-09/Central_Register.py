@@ -1,4 +1,4 @@
-import socket
+import socket, pickle
 #import startupBBB
 
 
@@ -15,7 +15,9 @@ while True:
     
     data, addr = sock.recvfrom(2048)
     
-    if clients.contains(data):
+    unpickled_data = pickle.loads(data)
+        
+    if not clients.contains(unpickled_data):
     
         for c in clients:
             sock.sendto(data,(c[1]))
