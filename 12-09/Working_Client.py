@@ -73,6 +73,8 @@ class Working_Client:
         self.sock.sendto(self.ID, (self.central_register_ip, self.central_register_port), self.pub_key.exportKey) 
         
         self.client_dict_lock = threading.Lock()
+        
+        # initialize genesis here!!!!
 
         self.listen = self.listeningThread(1, "Listening_Thread", self.sock)
         self.calc_1 = self.calculationThread(2, "Calculation_Thread", self.sock)
