@@ -38,7 +38,7 @@ class Block:
 
         h = hashlib.sha256()
         h.update(hash_string)
-        return h.hexdigest()
+        return h.digest()
 
     def has_valid_hash_value(self):
         """ Checks if hash value produces enough 0's according to the difficulty level.
@@ -50,6 +50,7 @@ class Block:
             return False
 
         hash_val_digest = self.get_hash_value()
+        # print "Hash value digest:" + hash_val_digest
         binary_hash = ProofOfWork.binary_from_digest(hash_val_digest)
         valid_hash = ProofOfWork.check_if_enough_zeros(binary_hash, self.hash_difficulty_value)
         return valid_hash
@@ -57,5 +58,8 @@ class Block:
     def get_counter(self):
         return self.counter
 
-    def get_hash_pointer_value(self):
+    def get_previous_block_hash(self):
         return self.previous_block_hash
+
+    def get_previous_block(self):
+        return self.previous_block
