@@ -6,6 +6,8 @@ from Block import Block
 import time
 import pickle
 import RSA
+import Common
+
 
 class Working_Client:
 
@@ -66,12 +68,6 @@ class Working_Client:
                                 continue
                     self.update_block()
 
-                    # calc suffix
-                    # if successful: send suffix to yourself and all other known clients
-                    
-                        # check if result is ok - necessary because i don't block the prefix while it is updated
-                        # this may end in a inconsistent condition
-
             def update_block(self):
                 # TODO
                 pass
@@ -91,7 +87,7 @@ class Working_Client:
         
         self.key = RSAWrapper.keygen()
         self.pub_key = self.key.publicKey()
-        self.ID = createHash(self.pub_key)
+        self.ID = Common.client_id_from_public_key(self.pub_key)
         
         self.client_dict[self.ID] = ((self.central_register_ip, self.central_register_port), self.pub_key)
         self.sock.sendto(self.ID, (self.central_register_ip, self.central_register_port), self.pub_key.exportKey) 
@@ -99,9 +95,9 @@ class Working_Client:
         self.client_dict_lock = threading.Lock()
 
         block_chain = BlockChain()
-        block_without_nonce1 = self.create_next_block(block_chain, client_name)
-        block_without_nonce2 = self.create_next_block(block_chain, client_name)
-        block_without_nonce3 = self.create_next_block(block_chain, client_name)
+        block_without_nonce1 = Working_Client.create_next_block(block_chain, client_name)
+        block_without_nonce2 = Working_Client.create_next_block(block_chain, client_name)
+        block_without_nonce3 = Working_Client.create_next_block(block_chain, client_name)
 
         self.listen = self.listeningThread(1, "Listening_Thread", self.sock, block_chain)
         self.calc_1 = self.calculationThread(2, "Calculation_Thread", self.sock, block_without_nonce1)
@@ -113,8 +109,8 @@ class Working_Client:
         self.calc_2.start()
         self.calc_3.start()
 
-
-    def create_next_block(self, block_chain, client_name):
+    @staticmethod
+    def create_next_block(block_chain, client_name):
         prev_block = block_chain.get_latest_block()
         timestamp = int(time.time())
         data = client_name
