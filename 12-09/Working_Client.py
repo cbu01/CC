@@ -20,7 +20,7 @@ class Working_Client:
                     client_dict_lock.aquire
                     client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
                     client_dict_lock.release
-                 
+                else:
                 # check if received suffix is correct
         
                 # if suffix is correct:
