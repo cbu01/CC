@@ -97,6 +97,8 @@ class Working_Client:
         self.sock.sendto(self.ID, (self.central_register_ip, self.central_register_port), self.pub_key.exportKey) 
         
         self.client_dict_lock = threading.Lock()
+        
+        # initialize genesis here!!!!
 
         block_chain = BlockChain()
         block_without_nonce1 = Working_Client.create_next_block(block_chain, client_name)
