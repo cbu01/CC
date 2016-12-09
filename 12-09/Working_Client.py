@@ -17,17 +17,18 @@ class Working_Client:
                 
                 # check if it is a new client
                 if (addr == (self.register_ip, self.register_port):
+                    # aquire lock
                     clients[data[0]] = (data[1],data)
+                    # release lock
                  
                 # check if received suffix is correct
         
-                # if suffix is correct: set search parameters new
+                # if suffix is correct:
         
                 # add block to blockchain
         
                 # hand over parameter to calculation threads
         
-                # unblock
         
                 # restart this loop
         
@@ -42,11 +43,14 @@ class Working_Client:
             def run(self):
         
             while True:
-                # read prefix
+
                 # calc suffix
                 # if successful: send suffix to yourself and all other known clients
                 # check if result is ok - necessary because i don't block the prefix while it is updated
                 # this may end in a inconsistent condition
+                # aquire lock
+                # send result to all clients
+                # release lock
  
     def __init__(self, IP, PORT):
     
