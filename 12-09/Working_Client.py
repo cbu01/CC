@@ -18,7 +18,7 @@ class Working_Client:
                 # check if it is a new client
                 if (addr == (self.register_ip, self.register_port):
                     # aquire lock
-                    clients[data[0]] = (data[1],data)
+                    client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
                     # release lock
                  
                 # check if received suffix is correct
