@@ -16,10 +16,10 @@ class Working_Client:
                 data, addr = sock.recvfrom(2048)
                 
                 # check if it is a new client
-                if (addr == (self.register_ip, self.register_port):
-                    # aquire lock
+                if (addr == (self.register_ip, self.register_port)):
+                    client_dict_lock.aquire
                     client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
-                    # release lock
+                    client_dict_lock.release
                  
                 # check if received suffix is correct
         
@@ -42,15 +42,16 @@ class Working_Client:
             
             def run(self):
         
-            while True:
+                while True:
 
-                # calc suffix
-                # if successful: send suffix to yourself and all other known clients
-                # check if result is ok - necessary because i don't block the prefix while it is updated
-                # this may end in a inconsistent condition
-                # aquire lock
-                # send result to all clients
-                # release lock
+                    # calc suffix
+                    # if successful: send suffix to yourself and all other known clients
+                    # check if result is ok - necessary because i don't block the prefix while it is updated
+                    # this may end in a inconsistent condition
+                    client_dict_lock.aquire
+                    for c in client_dict:
+                        sock.sendto(suffix, client_dict[c][0])
+                    client_dict_lock.release
  
     def __init__(self, IP, PORT):
     
@@ -66,14 +67,18 @@ class Working_Client:
         self.central_register_port = 10555
         
         self.key = RSAWrapper.keygen()
-        self.ID = 
+        self.pub_key = self.key.publicKey()
+        self.ID = createHash(self.pub_key)
         
-        self.sock.sendto() 
+        self.client_dict[self.ID] = ((self.central_register_ip, self.central_register_port), self.pub_key)
+        self.sock.sendto(self.ID, (self.central_register_ip, self.central_register_port), self.pub_key.exportKey) 
+        
+        client_dict_lock = threading.Lock()
 
-        self.listen = listeningThread(1, "Listening_Thread", self.sock)
-        self.calc_1 = calculationThread(2, "Calculation_Thread", self.sock)
-        self.calc_2 = calculationThread(3, "Calculation_Thread", self.sock)
-        self.calc_3 = calculationThread(4, "Calculation_Thread", self.sock)
+        self.listen = self.listeningThread(1, "Listening_Thread", self.sock)
+        self.calc_1 = self.calculationThread(2, "Calculation_Thread", self.sock)
+        self.calc_2 = self.calculationThread(3, "Calculation_Thread", self.sock)
+        self.calc_3 = self.calculationThread(4, "Calculation_Thread", self.sock)
 
         self.listen.start()
         self.calc_1.start()
