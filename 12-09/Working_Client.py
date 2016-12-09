@@ -75,37 +75,6 @@ class calculationThread(threading.Thread):
         # TODO
         pass
 
-def startClient(IP, PORT, client_name):
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((IP, PORT)) 
-        
-    client_dict = {}
-       
-    central_register_ip = "localhost"
-    central_register_port = 10555
-      
-    key = RSAWrapper.keygen()
-    pub_key = key.publickey()
-    ID = Common.client_id_from_public_key(pub_key)
-     
-    client_dict[ID] = ((central_register_ip, central_register_port), pub_key)
-    sock.sendto(ID, (central_register_ip, central_register_port), pub_key.exportKey) 
-      
-    client_dict_lock = threading.Lock()
-
-    block_chain = BlockChain()
-    block_without_nonce1 = create_next_block(block_chain, client_name)
-    block_without_nonce2 = create_next_block(block_chain, client_name)
-    block_without_nonce3 = create_next_block(block_chain, client_name)
-    listen = listeningThread(1, "Listening_Thread", sock, block_chain)
-    calc_1 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce1)
-    calc_2 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce2)
-    calc_3 = calculationThread(4, "Calculation_Thread", sock, block_without_nonce3)
-    listen.start()
-    calc_1.start()
-    calc_2.start()
-    calc_3.start()
 
 
 def create_next_block(block_chain, client_name):
@@ -118,4 +87,36 @@ def create_next_block(block_chain, client_name):
 
     return block
 
-startClient("localhost",15000, "I AM YOUR FATHER")
+
+HOST = "localhost"
+PORT = 15000
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind((IP, PORT)) 
+        
+client_dict = {}
+       
+central_register_ip = "localhost"
+central_register_port = 10555
+      
+key = RSAWrapper.keygen()
+pub_key = key.publickey()
+ID = Common.client_id_from_public_key(pub_key)
+     
+client_dict[ID] = ((HOST, PORT), pub_key)
+sock.sendto((ID, (HOST,PORT),pub_key),(central_register_ip, central_register_port)) 
+      
+client_dict_lock = threading.Lock()
+
+block_chain = BlockChain()
+block_without_nonce1 = create_next_block(block_chain, client_name)
+block_without_nonce2 = create_next_block(block_chain, client_name)
+block_without_nonce3 = create_next_block(block_chain, client_name)
+listen = listeningThread(1, "Listening_Thread", sock, block_chain)
+calc_1 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce1)
+calc_2 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce2)
+calc_3 = calculationThread(4, "Calculation_Thread", sock, block_without_nonce3)
+listen.start()
+calc_1.start()
+calc_2.start()
+calc_3.start()
