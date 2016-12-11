@@ -15,8 +15,7 @@ def run_sanity_test():
         data = str(timestamp)
         new_counter = prev_block.get_counter() + 1
 
-        block = Block(prev_block,
-                      prev_block.get_hash_value(),
+        block = Block(prev_block.get_hash_value(),
                       timestamp,
                       data,
                       new_counter,
@@ -42,6 +41,7 @@ def set_nonce(block):
         if nonce_found:
             return
 
+
 def run_illegal_hash_value_block_test():
     hash_difficulty_value = 15
     bc = BlockChain()
@@ -53,8 +53,7 @@ def run_illegal_hash_value_block_test():
 
     wrong_hash_value = "asdasdfasdfasdf"
 
-    block = Block(prev_block,
-                  wrong_hash_value, # prev_block.get_hash_value(),
+    block = Block(wrong_hash_value, # prev_block.get_hash_value(),
                   timestamp,
                   data,
                   new_counter,
@@ -78,8 +77,7 @@ def run_illegal_nonce_block_test():
     data = str(timestamp)
     new_counter = prev_block.get_counter() + 1
 
-    block = Block(prev_block,
-                  prev_block.get_hash_value(),
+    block = Block(prev_block.get_hash_value(),
                   timestamp,
                   data,
                   new_counter,

@@ -4,13 +4,11 @@ import ProofOfWork
 
 class Block:
     def __init__(self,
-                 previous_block,
                  previous_block_hash,
                  timestamp,
                  data,
                  counter,
                  hash_difficulty_value):
-        self.previous_block = previous_block
         self.previous_block_hash = previous_block_hash
         self.timestamp = timestamp
         self.data = data
@@ -61,5 +59,5 @@ class Block:
     def get_previous_block_hash(self):
         return self.previous_block_hash
 
-    def get_previous_block(self):
-        return self.previous_block
+    def get_data(self):
+        return self.data
