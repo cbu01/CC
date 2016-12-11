@@ -156,6 +156,8 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, queue3,
                                client_dict_lock,
                                client_dict)
+
+    # Threads set in daemon mode so that they die when the main process dies
     listen.daemon = True
     listen.start()
 
