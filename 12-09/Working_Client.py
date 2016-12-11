@@ -8,11 +8,24 @@ import pickle
 from Crypto.PublicKey import RSA
 import Common
 import Queue
+import sys
 
 
 class listeningThread(threading.Thread):
-    def __init__(self, threadID, name, sock, block_chain, client_name, block_update_queues):
+    def __init__(self,
+                 threadID,
+                 name,
+                 sock,
+                 block_chain,
+                 client_name,
+                 block_update_queues,
+                 central_register_ip,
+                 central_register_port,
+                 client_dict):
         threading.Thread.__init__(self)
+        self.client_dict = client_dict
+        self.central_register_port = central_register_port
+        self.central_register_ip = central_register_ip
         self.client_name = client_name
         self.block_update_queues = block_update_queues
         self.block_chain = block_chain
@@ -27,10 +40,10 @@ class listeningThread(threading.Thread):
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
             # check if it is a new client
-            if addr == (central_register_ip, central_register_port):
-                client_dict_lock.acquire()
-                client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
-                client_dict_lock.release()
+            if addr == (self.central_register_ip, self.central_register_port):
+                self.client_dict_lock.acquire()
+                self.client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
+                self.client_dict_lock.release()
             else:
                 deserialized_block = pickle.loads(data)
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
@@ -49,8 +62,11 @@ class listeningThread(threading.Thread):
 
 
 class calculationThread(threading.Thread):
-    def __init__(self, threadID, name, sock, block_without_nonce, client_name, block_update_queue):
+    def __init__(self, threadID, name, sock, block_without_nonce, client_name, block_update_queue, client_dict_lock,
+                 client_dict):
         threading.Thread.__init__(self)
+        self.client_dict = client_dict
+        self.client_dict_lock = client_dict_lock
         self.sock = sock
         self.block_update_queue = block_update_queue
         self.client_name = client_name
@@ -67,15 +83,14 @@ class calculationThread(threading.Thread):
                     # Check if somebody else already found the next block
                     someone_already_found_block = not self.block_update_queue.empty()
                     if not someone_already_found_block:
-                        print "Thread {0} from client '{1}' found a nonce and thinks its the first one !".format(
-                            self.threadID,
-                            self.client_name, )
+                        print "Thread {0} found a nonce and thinks its the first one !".format(
+                            self.threadID)
                         # Broadcast the block
-                        client_dict_lock.acquire()
+                        self.client_dict_lock.acquire()
                         serialized_block = pickle.dumps(self.block)
-                        for c in client_dict:
-                            self.sock.sendto(serialized_block, client_dict[c][0])
-                        client_dict_lock.release()
+                        for c in self.client_dict:
+                            self.sock.sendto(serialized_block, self.client_dict[c][0])
+                        self.client_dict_lock.release()
                         self.update_block()
                         continue
                     else:
@@ -103,42 +118,70 @@ def create_next_block(block_chain, client_name):
     return block
 
 
-HOST = "localhost"
-PORT = 15000
+def run(client_name, client_ip, client_port, central_register_ip, central_register_port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((client_ip, client_port))
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind((HOST, PORT))
+    client_dict = {}
 
-client_dict = {}
+    key = RSAWrapper.keygen()
+    pub_key = key.publickey()
+    ID = Common.client_id_from_public_key(pub_key)
 
-central_register_ip = "localhost"
-central_register_port = 10555
+    client_dict[ID] = ((client_ip, client_port), pub_key)
+    serialized_message = pickle.dumps((ID, (client_ip, client_port), pub_key))
+    sock.sendto(serialized_message, (central_register_ip, central_register_port))
 
-key = RSAWrapper.keygen()
-pub_key = key.publickey()
-ID = Common.client_id_from_public_key(pub_key)
+    client_dict_lock = threading.Lock()
 
-client_dict[ID] = ((HOST, PORT), pub_key)
-serialized_message = pickle.dumps((ID, (HOST, PORT), pub_key))
-sock.sendto(serialized_message, (central_register_ip, central_register_port))
+    block_chain = BlockChain()
+    block_without_nonce1 = create_next_block(block_chain, client_name)
+    block_without_nonce2 = create_next_block(block_chain, client_name)
+    block_without_nonce3 = create_next_block(block_chain, client_name)
 
-client_dict_lock = threading.Lock()
+    queue1 = Queue.Queue()
+    queue2 = Queue.Queue()
+    queue3 = Queue.Queue()
 
-client_name = "Awesome client"
-block_chain = BlockChain()
-block_without_nonce1 = create_next_block(block_chain, client_name)
-block_without_nonce2 = create_next_block(block_chain, client_name)
-block_without_nonce3 = create_next_block(block_chain, client_name)
+    listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name, [queue1, queue2, queue3],
+                             central_register_ip,
+                             central_register_port,
+                             client_dict)
+    calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, queue1,
+                               client_dict_lock,
+                               client_dict)
+    calc_2 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce2, client_name, queue2,
+                               client_dict_lock,
+                               client_dict)
+    calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, queue3,
+                               client_dict_lock,
+                               client_dict)
+    listen.daemon = True
+    listen.start()
 
-queue1 = Queue.Queue()
-queue2 = Queue.Queue()
-queue3 = Queue.Queue()
+    calc_1.daemon = True
+    calc_2.daemon = True
+    calc_3.daemon = True
+    calc_1.start()
+    calc_2.start()
+    calc_3.start()
+    while True:
+        time.sleep(1)
 
-listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name, [queue1, queue2, queue3])
-calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, queue1)
-calc_2 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce2, client_name, queue2)
-calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, queue3)
-listen.start()
-calc_1.start()
-calc_2.start()
-calc_3.start()
+
+if __name__ == "__main__":
+    try:
+        client_name = sys.argv[1]
+        client_ip = sys.argv[2]
+        client_port = int(sys.argv[3])
+        central_register_ip = sys.argv[4]
+        central_register_port = int(sys.argv[5])
+        run(client_name, client_ip, client_port, central_register_ip, central_register_port)
+    except:
+        message = """Usage: python Working_Client.py client_name client_ip client_port central_register_ip central_register_port
+         Example: python Working_Client.py AwesomeClient localhost 10500 localhost 10550
+         """
+
+        print message
+        sys.exit()
+
