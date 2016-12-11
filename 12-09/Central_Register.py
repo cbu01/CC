@@ -13,15 +13,21 @@ def run(host, port):
     while True:
 
         data, addr = sock.recvfrom(2048)
+        
+        print "data received"
 
         unpickled_data = pickle.loads(data)
+        
+        print unpickled_data
 
         if not unpickled_data in clients:
+            
+            print "new client"
 
             for c in clients:
                 sock.sendto(data,(c[1]))
 
-                clients.append()
+            clients.append(unpickled_data)
 
 if __name__ == "__main__":
     try:

@@ -39,11 +39,15 @@ class listeningThread(threading.Thread):
 
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
+            print "client received data from address" + str(addr)
+            print str(self.central_register_ip == addr[0])
+            print str(self.central_register_port == addr[1])
             # check if it is a new client
-            if addr == (self.central_register_ip, self.central_register_port):
+            if (self.central_register_ip == addr[0] and self.central_register_port == addr[1]):
                 self.client_dict_lock.acquire()
                 self.client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
                 self.client_dict_lock.release()
+                print "new client registered"
             else:
                 deserialized_block = pickle.loads(data)
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
@@ -88,6 +92,7 @@ class calculationThread(threading.Thread):
                         # Broadcast the block
                         self.client_dict_lock.acquire()
                         serialized_block = pickle.dumps(self.block)
+                        print "client_dict: " + str(self.client_dict)
                         for c in self.client_dict:
                             self.sock.sendto(serialized_block, self.client_dict[c][0])
                         self.client_dict_lock.release()
