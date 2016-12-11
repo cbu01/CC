@@ -134,7 +134,7 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     ID = Common.client_id_from_public_key(pub_key)
 
     client_dict[ID] = ((client_ip, client_port), pub_key)
-    serialized_message = pickle.dumps((ID, (client_ip, client_port), pub_key))
+    serialized_message = pickle.dumps((ID, (client_ip, client_port), pub_key.exportKey()))
     sock.sendto(serialized_message, (central_register_ip, central_register_port))
 
     client_dict_lock = threading.Lock()
