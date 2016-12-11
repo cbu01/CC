@@ -21,9 +21,11 @@ class listeningThread(threading.Thread):
                  block_update_queues,
                  central_register_ip,
                  central_register_port,
+                 client_dict_lock,
                  client_dict):
         threading.Thread.__init__(self)
         self.client_dict = client_dict
+        self.client_dict_lock = client_dict_lock
         self.central_register_port = central_register_port
         self.central_register_ip = central_register_ip
         self.client_name = client_name
@@ -40,16 +42,14 @@ class listeningThread(threading.Thread):
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
             print "client received data from address" + str(addr)
-            print str(self.central_register_ip == addr[0])
-            print str(self.central_register_port == addr[1])
+            deserialized_block = pickle.loads(data)
             # check if it is a new client
             if (self.central_register_ip == addr[0] and self.central_register_port == addr[1]):
                 self.client_dict_lock.acquire()
-                self.client_dict[data[0]] = (data[1], RSA.importKey(data[2]))
+                self.client_dict[deserialized_block[0]] = (deserialized_block[1], RSA.importKey(deserialized_block[2]))
                 self.client_dict_lock.release()
                 print "new client registered"
             else:
-                deserialized_block = pickle.loads(data)
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
                 if new_block_verified:
                     block_added = self.block_chain.add_block(deserialized_block)
@@ -151,6 +151,7 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name, [queue1, queue2, queue3],
                              central_register_ip,
                              central_register_port,
+                             client_dict_lock,
                              client_dict)
     calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, queue1,
                                client_dict_lock,
