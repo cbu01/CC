@@ -36,19 +36,16 @@ class listeningThread(threading.Thread):
         self.name = name
 
     def run(self):
-        print "listeningThread for client '{0}' is active".format(self.client_name)
         while True:
 
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
-            print "client received data from address" + str(addr)
             deserialized_block = pickle.loads(data)
             # check if it is a new client
             if (self.central_register_ip == addr[0] and self.central_register_port == addr[1]):
                 self.client_dict_lock.acquire()
                 self.client_dict[deserialized_block[0]] = (deserialized_block[1], RSA.importKey(deserialized_block[2]))
                 self.client_dict_lock.release()
-                print "new client registered"
             else:
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
                 if new_block_verified:
@@ -79,7 +76,6 @@ class calculationThread(threading.Thread):
         self.block = block_without_nonce
 
     def run(self):
-        print "calculationThread-{0} for client '{1}' is active".format(self.threadID, self.client_name)
         while True:
             for i in range(1000):
                 found_nonce = ProofOfWork.try_to_set_correct_nonce(self.block)
@@ -92,7 +88,7 @@ class calculationThread(threading.Thread):
                         # Broadcast the block
                         self.client_dict_lock.acquire()
                         serialized_block = pickle.dumps(self.block)
-                        print "client_dict: " + str(self.client_dict)
+
                         for c in self.client_dict:
                             self.sock.sendto(serialized_block, self.client_dict[c][0])
                         self.client_dict_lock.release()
@@ -173,6 +169,9 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     calc_1.start()
     calc_2.start()
     calc_3.start()
+
+    print "Client {0} started".format(client_name)
+
     while True:
         time.sleep(1)
 
