@@ -25,7 +25,10 @@ def run(host, port):
             print "new client"
 
             for c in clients:
+                # send the data to the known clients
                 sock.sendto(data,(c[1]))
+                # send the client addresses to the new client
+                sock.sendto(c, unpickled_data[1])
 
             clients.append(unpickled_data)
 
