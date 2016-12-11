@@ -14,21 +14,24 @@ def run(host, port):
 
         data, addr = sock.recvfrom(2048)
         
-        print "data received"
-
+        print "received data"
+        print data
         unpickled_data = pickle.loads(data)
-        
-        print unpickled_data
+        print "ping"
+        print "data received " + str(unpickled_data)
 
         if not unpickled_data in clients:
             
             print "new client"
 
             for c in clients:
+                print "clientloop"
                 # send the data to the known clients
                 sock.sendto(data,(c[1]))
+                print "data has been send to other clients"
                 # send the client addresses to the new client
-                sock.sendto(c, unpickled_data[1])
+                sock.sendto(pickle.dumps(c), unpickled_data[1])
+                print "new client is receiving the data for other clients"
 
             clients.append(unpickled_data)
 
