@@ -71,6 +71,7 @@ class listeningThread(threading.Thread):
                     pass
             elif INCOMING_BLOCK_FROM_OUR_REQUEST:
                 self.block_chain.add_blocks_from_another_chain([THE_BLOCK_SENT])
+                # TODO Mannsi - Update the block currently being worked on by calculation threads
             else:
                 # Received new block
                 received_block = deserialized_data
