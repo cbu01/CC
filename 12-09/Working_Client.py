@@ -35,24 +35,70 @@ class listeningThread(threading.Thread):
         self.threadID = threadID
         self.name = name
 
+
+    # TODO Mannsi - Client needs to somehow try to get the initial version of the block chain when he starts (unless he is the only client of course)
     def run(self):
+        # TODO add the following cases
+        # 1. Incoming request for blocks by block hash id
+        # 2. After issuing a request like the one above, a way to receive the blocks one by one from the sender
+
         while True:
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
-            deserialized_block = pickle.loads(data)
-            # check if it is a new client
-            if (self.central_register_ip == addr[0] and self.central_register_port == addr[1]):
+            deserialized_data = pickle.loads(data)
+
+            # TODO these are just placeholders so that I can code the below if statements.
+            # These are the parameters that will be sent in the request_block_chain_from_random_client() function below
+            INCOMING_REQUEST_FOR_BLOCKS = False
+            HASH_ID_FROM_REQUEST = ""
+
+            # TODO again these are just placeholder parameters since I don't know how this will be sent exactly
+            # These are the parameters sent in the INCOMING_REQUEST_FOR_BLOCKS if block below
+            INCOMING_BLOCK_FROM_OUR_REQUEST = False
+            THE_BLOCK_SENT = None
+
+            if self.central_register_ip == addr[0] and self.central_register_port == addr[1]:
+                # New client
+
                 self.client_dict_lock.acquire()
-                self.client_dict[deserialized_block[0]] = (deserialized_block[1], RSA.importKey(deserialized_block[2]))
+                self.client_dict[deserialized_data[0]] = (deserialized_data[1], RSA.importKey(deserialized_data[2]))
                 self.client_dict_lock.release()
+            elif INCOMING_REQUEST_FOR_BLOCKS:
+                # Received request for blocks in our block chain
+                blocks_to_respond_with = self.block_chain.get_blocks_since_hash_id(HASH_ID_FROM_REQUEST)
+                for block in blocks_to_respond_with:
+                    # TODO Caroline send block to the client that sent this request to us
+                    pass
+            elif INCOMING_BLOCK_FROM_OUR_REQUEST:
+                self.block_chain.add_blocks_from_another_chain([THE_BLOCK_SENT])
             else:
-                # TODO make sure that we are not trying to add blocks with lower counter than we should. I think current working block -1 is the limit
-                new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
+                # Received new block
+                received_block = deserialized_data
+
+                received_block_counter = received_block.get_counter()
+                target_block_counter = self.block_chain.get_target_block().get_counter()
+
+                block_has_too_low_counter = received_block_counter < target_block_counter
+                if block_has_too_low_counter:
+                    print "We got an older block. Our latest block counter is {0} but the new blocks counter is {1}".\
+                        format(target_block_counter, received_block_counter)
+                    continue
+
+                block_has_too_high_counter = received_block_counter > target_block_counter + 1
+                if block_has_too_high_counter:
+                    print "Got a higher block counter than expected. Expected counter is {0} but we got {1}. " \
+                          "Maybe we are out of sync, so lets call some client and get his/her latest block chain".\
+                        format(target_block_counter + 1, received_block_counter)
+                    hash_id = self.block_chain.get_latest_safe_block_hash_id()
+                    self.request_block_chain_from_random_client(hash_id)
+                    continue
+
+                new_block_verified = ProofOfWork.verify_next_block_in_chain(received_block, self.block_chain)
                 if new_block_verified:
-                    block_added = self.block_chain.add_block(deserialized_block)
+                    block_added = self.block_chain.add_block(received_block)
                     if block_added:
                         print "Block number {0} was added to the block chain by client '{1}'".format(
-                            str(deserialized_block.get_counter()), deserialized_block.get_data())
+                            str(received_block.get_counter()), received_block.get_data())
                         for queue in self.block_update_queues:
                             next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
                             queue.put(next_block)
@@ -61,12 +107,8 @@ class listeningThread(threading.Thread):
                 else:
                     print "Got a proposed new block but it did not verify"
 
-    def get_random_other_client(self):
-        # TODO
-        pass
-
-    def request_block_chain_from_random_client(self):
-        # TODO
+    def request_block_chain_from_random_client(self, hash_id):
+        # TODO Caroline send request to a random client asking for blocks using the above hash_id as parameter
         pass
 
 

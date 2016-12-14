@@ -22,6 +22,7 @@ def try_to_set_correct_nonce(block):
     return False
 
 
+# TODO
 def verify_next_block_in_chain(next_block, block_chain):
     block_hash_internal_verification = next_block.has_valid_hash_value()
     if not block_hash_internal_verification:
