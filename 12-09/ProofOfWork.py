@@ -28,7 +28,7 @@ def verify_next_block_in_chain(next_block, block_chain):
         print "Block does not verify internal hash"
         return False
 
-    current_latest_block = block_chain.get_latest_block()
+    current_latest_block = block_chain.get_target_block()
     previous_block_hash_val = next_block.get_previous_block_hash()
     current_block_hash_val = current_latest_block.get_hash_value()
 

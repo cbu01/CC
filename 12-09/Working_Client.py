@@ -37,7 +37,6 @@ class listeningThread(threading.Thread):
 
     def run(self):
         while True:
-
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
             deserialized_block = pickle.loads(data)
@@ -47,6 +46,7 @@ class listeningThread(threading.Thread):
                 self.client_dict[deserialized_block[0]] = (deserialized_block[1], RSA.importKey(deserialized_block[2]))
                 self.client_dict_lock.release()
             else:
+                # TODO make sure that we are not trying to add blocks with lower counter than we should. I think current working block -1 is the limit
                 new_block_verified = ProofOfWork.verify_next_block_in_chain(deserialized_block, self.block_chain)
                 if new_block_verified:
                     block_added = self.block_chain.add_block(deserialized_block)
@@ -60,6 +60,14 @@ class listeningThread(threading.Thread):
                         print "Something went wrong. Could not add block to chain"
                 else:
                     print "Got a proposed new block but it did not verify"
+
+    def get_random_other_client(self):
+        # TODO
+        pass
+
+    def request_block_chain_from_random_client(self):
+        # TODO
+        pass
 
 
 class calculationThread(threading.Thread):
@@ -109,7 +117,7 @@ class calculationThread(threading.Thread):
 
 
 def create_next_block(block_chain, client_name):
-    prev_block = block_chain.get_latest_block()
+    prev_block = block_chain.get_target_block()
     timestamp = int(time.time())
     data = client_name
     new_counter = prev_block.get_counter() + 1
