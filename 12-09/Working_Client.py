@@ -19,11 +19,13 @@ class listeningThread(threading.Thread):
                  block_chain,
                  client_name,
                  block_update_queues,
+                 stop_work_queues,
                  central_register_ip,
                  central_register_port,
                  client_dict_lock,
                  client_dict):
         threading.Thread.__init__(self)
+        self.stop_work_queues = stop_work_queues
         self.client_dict = client_dict
         self.client_dict_lock = client_dict_lock
         self.central_register_port = central_register_port
@@ -38,10 +40,6 @@ class listeningThread(threading.Thread):
 
     # TODO Mannsi - Client needs to somehow try to get the initial version of the block chain when he starts (unless he is the only client of course)
     def run(self):
-        # TODO add the following cases
-        # 1. Incoming request for blocks by block hash id
-        # 2. After issuing a request like the one above, a way to receive the blocks one by one from the sender
-
         while True:
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
@@ -57,6 +55,8 @@ class listeningThread(threading.Thread):
             INCOMING_BLOCK_FROM_OUR_REQUEST = False
             THE_BLOCK_SENT = None
 
+            FINISHED_SENDING_REQUESTED_BLOCKS = False
+
             if self.central_register_ip == addr[0] and self.central_register_port == addr[1]:
                 # New client
 
@@ -69,11 +69,21 @@ class listeningThread(threading.Thread):
                 for block in blocks_to_respond_with:
                     # TODO Caroline send block to the client that sent this request to us
                     pass
+                # TODO send to the same client that we are finished sending blocks
             elif INCOMING_BLOCK_FROM_OUR_REQUEST:
                 self.block_chain.add_blocks_from_another_chain([THE_BLOCK_SENT])
-                # TODO Mannsi - Update the block currently being worked on by calculation threads
+            elif FINISHED_SENDING_REQUESTED_BLOCKS:
+                # New block for calculation threads
+                for queue in self.block_update_queues:
+                    next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
+                    queue.put(next_block)
+
+                # Remove stop condition so calculation threads can restart their work
+                for stop_queue in self.stop_work_queues:
+                    stop_queue.get()
+                pass
             else:
-                # Received new block
+                # Received newly discovered block
                 received_block = deserialized_data
 
                 received_block_counter = received_block.get_counter()
@@ -109,14 +119,23 @@ class listeningThread(threading.Thread):
                     print "Got a proposed new block but it did not verify"
 
     def request_block_chain_from_random_client(self, hash_id):
+        for stop_queue in self.stop_work_queues:
+            stop_queue.put(True)
         # TODO Caroline send request to a random client asking for blocks using the above hash_id as parameter
-        pass
 
 
 class calculationThread(threading.Thread):
-    def __init__(self, threadID, name, sock, block_without_nonce, client_name, block_update_queue, client_dict_lock,
+    def __init__(self, threadID,
+                 name,
+                 sock,
+                 block_without_nonce,
+                 client_name,
+                 block_update_queue,
+                 stop_work_queue,
+                 client_dict_lock,
                  client_dict):
         threading.Thread.__init__(self)
+        self.stop_work_queue = stop_work_queue  # If this queue is non-empty, stop work
         self.client_dict = client_dict
         self.client_dict_lock = client_dict_lock
         self.sock = sock
@@ -136,6 +155,12 @@ class calculationThread(threading.Thread):
                     if not someone_already_found_block:
                         print "Thread {0} found a nonce and thinks its the first one !".format(
                             self.threadID)
+
+                        if not self.stop_work_queue.empty():
+                            print "O No ! The listener thread asked us to stop working. " \
+                                  "Lets not even try to broadcast the newly found block"
+                            break
+
                         # Broadcast the block
                         self.client_dict_lock.acquire()
                         serialized_block = pickle.dumps(self.block)
@@ -151,6 +176,12 @@ class calculationThread(threading.Thread):
                                                                                                  self.client_name)
                         self.update_block()
                         continue
+
+            if not self.stop_work_queue.empty():
+                print "Calculation thread was asked to stop working"
+
+            while not self.stop_work_queue.empty():
+                time.sleep(0.01)
             self.update_block()
 
     def update_block(self):
@@ -191,22 +222,31 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     block_without_nonce2 = create_next_block(block_chain, client_name)
     block_without_nonce3 = create_next_block(block_chain, client_name)
 
-    queue1 = Queue.Queue()
-    queue2 = Queue.Queue()
-    queue3 = Queue.Queue()
+    block_update_queue1 = Queue.Queue()
+    block_update_queue2 = Queue.Queue()
+    block_update_queue3 = Queue.Queue()
 
-    listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name, [queue1, queue2, queue3],
+    stop_calculation_queue1 = Queue.Queue()
+    stop_calculation_queue2 = Queue.Queue()
+    stop_calculation_queue3 = Queue.Queue()
+
+    listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name,
+                             [block_update_queue1, block_update_queue2, block_update_queue3],
+                             [stop_calculation_queue1, stop_calculation_queue2, stop_calculation_queue3],
                              central_register_ip,
                              central_register_port,
                              client_dict_lock,
                              client_dict)
-    calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, queue1,
+    calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, block_update_queue1,
+                               stop_calculation_queue1,
                                client_dict_lock,
                                client_dict)
-    calc_2 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce2, client_name, queue2,
+    calc_2 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce2, client_name, block_update_queue2,
+                               stop_calculation_queue2,
                                client_dict_lock,
                                client_dict)
-    calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, queue3,
+    calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, block_update_queue3,
+                               stop_calculation_queue3,
                                client_dict_lock,
                                client_dict)
 
