@@ -10,20 +10,29 @@ import Common
 import Queue
 import sys
 
+REQUEST_BLOCKS = "REQUEST_BLOCKS"
+DISCOVERED_BLOCK = "DISCOVERED_BLOCK"
+FINISHED_SENDING_REQUESTED_BLOCKS = "FINISHED_SENDING_REQUESTED_BLOCKS"
+INCOMING_BLOCK_FROM_OUR_REQUEST = "INCOMING_BLOCK_FROM_OUR_REQUEST"
+
 
 class listeningThread(threading.Thread):
     def __init__(self,
+                 client_id,
                  threadID,
                  name,
                  sock,
                  block_chain,
                  client_name,
                  block_update_queues,
+                 stop_work_queues,
                  central_register_ip,
                  central_register_port,
                  client_dict_lock,
                  client_dict):
         threading.Thread.__init__(self)
+        self.client_id = client_id
+        self.stop_work_queues = stop_work_queues
         self.client_dict = client_dict
         self.client_dict_lock = client_dict_lock
         self.central_register_port = central_register_port
@@ -35,88 +44,124 @@ class listeningThread(threading.Thread):
         self.threadID = threadID
         self.name = name
 
-
-    # TODO Mannsi - Client needs to somehow try to get the initial version of the block chain when he starts (unless he is the only client of course)
     def run(self):
-        # TODO add the following cases
-        # 1. Incoming request for blocks by block hash id
-        # 2. After issuing a request like the one above, a way to receive the blocks one by one from the sender
+        try:
+            waiting_for_blocks_from_client = False
 
-        while True:
-            # listen for new messages
-            data, addr = self.sock.recvfrom(4096)
-            deserialized_data = pickle.loads(data)
+            while True:
+                # listen for new messages
+                data, addr = self.sock.recvfrom(4096)
+                deserialized_data = pickle.loads(data)
 
-            # TODO these are just placeholders so that I can code the below if statements.
-            # These are the parameters that will be sent in the request_block_chain_from_random_client() function below
-            INCOMING_REQUEST_FOR_BLOCKS = False
-            HASH_ID_FROM_REQUEST = ""
+                command = deserialized_data[0]
 
-            # TODO again these are just placeholder parameters since I don't know how this will be sent exactly
-            # These are the parameters sent in the INCOMING_REQUEST_FOR_BLOCKS if block below
-            INCOMING_BLOCK_FROM_OUR_REQUEST = False
-            THE_BLOCK_SENT = None
+                if self.central_register_ip == addr[0] and self.central_register_port == addr[1]:
+                    # New client
 
-            if self.central_register_ip == addr[0] and self.central_register_port == addr[1]:
-                # New client
+                    self.client_dict_lock.acquire()
+                    self.client_dict[deserialized_data[0]] = (deserialized_data[1], RSA.importKey(deserialized_data[2]))
+                    self.client_dict_lock.release()
+                elif command == REQUEST_BLOCKS:
+                    print "Got a request for blocks in my block chain"
+                    hash_id_from_request = deserialized_data[1]
+                    blocks_to_respond_with = self.block_chain.get_blocks_since_hash_id(hash_id_from_request)
+                    for block in blocks_to_respond_with:
+                        msg = pickle.dumps((INCOMING_BLOCK_FROM_OUR_REQUEST, block))
+                        self.sock.sendto(msg, addr)
 
-                self.client_dict_lock.acquire()
-                self.client_dict[deserialized_data[0]] = (deserialized_data[1], RSA.importKey(deserialized_data[2]))
-                self.client_dict_lock.release()
-            elif INCOMING_REQUEST_FOR_BLOCKS:
-                # Received request for blocks in our block chain
-                blocks_to_respond_with = self.block_chain.get_blocks_since_hash_id(HASH_ID_FROM_REQUEST)
-                for block in blocks_to_respond_with:
-                    # TODO Caroline send block to the client that sent this request to us
-                    pass
-            elif INCOMING_BLOCK_FROM_OUR_REQUEST:
-                self.block_chain.add_blocks_from_another_chain([THE_BLOCK_SENT])
-                # TODO Mannsi - Update the block currently being worked on by calculation threads
-            else:
-                # Received new block
-                received_block = deserialized_data
+                    # Send messages that we are done sending blocks
+                    msg = pickle.dumps((FINISHED_SENDING_REQUESTED_BLOCKS, ""))
+                    self.sock.sendto(msg, addr)
+                    print "Finished sending blocks to client"
+                elif command == INCOMING_BLOCK_FROM_OUR_REQUEST:
+                    sent_block = deserialized_data[1]
+                    self.block_chain.add_blocks_from_another_chain([sent_block])
+                elif command == FINISHED_SENDING_REQUESTED_BLOCKS:
+                    # New block for calculation threads
+                    current_latest_counter = self.block_chain.get_target_block().get_counter()
+                    print "Finished receiving blocks from other client. Current latest block chain counter is " + str(current_latest_counter)
+                    for queue in self.block_update_queues:
+                        next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
+                        queue.put(next_block)
 
-                received_block_counter = received_block.get_counter()
-                target_block_counter = self.block_chain.get_target_block().get_counter()
+                    # Remove stop condition so calculation threads can restart their work
+                    for stop_queue in self.stop_work_queues:
+                        stop_queue.get()
 
-                block_has_too_low_counter = received_block_counter < target_block_counter
-                if block_has_too_low_counter:
-                    print "We got an older block. Our latest block counter is {0} but the new blocks counter is {1}".\
-                        format(target_block_counter, received_block_counter)
-                    continue
+                    waiting_for_blocks_from_client = False
+                elif command == DISCOVERED_BLOCK:
+                    if waiting_for_blocks_from_client:
+                        continue
+                    received_block = deserialized_data[1]
+                    received_block_counter = received_block.get_counter()
+                    target_block_counter = self.block_chain.get_target_block().get_counter()
 
-                block_has_too_high_counter = received_block_counter > target_block_counter + 1
-                if block_has_too_high_counter:
-                    print "Got a higher block counter than expected. Expected counter is {0} but we got {1}. " \
-                          "Maybe we are out of sync, so lets call some client and get his/her latest block chain".\
-                        format(target_block_counter + 1, received_block_counter)
-                    hash_id = self.block_chain.get_latest_safe_block_hash_id()
-                    self.request_block_chain_from_random_client(hash_id)
-                    continue
+                    block_has_too_low_counter = received_block_counter < target_block_counter
+                    if block_has_too_low_counter:
+                        print "We got an older block. Our latest block counter is {0} but the new blocks counter is {1}".\
+                            format(target_block_counter, received_block_counter)
+                        continue
 
-                new_block_verified = ProofOfWork.verify_next_block_in_chain(received_block, self.block_chain)
-                if new_block_verified:
-                    block_added = self.block_chain.add_block(received_block)
-                    if block_added:
-                        print "Block number {0} was added to the block chain by client '{1}'".format(
-                            str(received_block.get_counter()), received_block.get_data())
-                        for queue in self.block_update_queues:
-                            next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
-                            queue.put(next_block)
+                    block_has_too_high_counter = received_block_counter > target_block_counter + 1
+                    if block_has_too_high_counter:
+                        print "Got a higher block counter than expected. Expected counter is {0} but we got {1}. " \
+                              "Maybe we are out of sync, so lets call some client and get his/her latest block chain".\
+                            format(target_block_counter + 1, received_block_counter)
+
+                        # Try to nuke the block chain and send the genesis hash
+                        self.block_chain = BlockChain()
+                        hash_id = self.block_chain.get_latest_safe_block_hash_id()
+                        waiting_for_blocks_from_client = True
+                        self.request_block_chain_from_random_client(hash_id)
+                        continue
+
+                    new_block_verified = ProofOfWork.verify_next_block_in_chain(received_block, self.block_chain)
+                    if new_block_verified:
+                        block_added = self.block_chain.add_block(received_block)
+                        if block_added:
+                            print "Block number {0} was added to the block chain by client '{1}'".format(
+                                str(received_block.get_counter()), received_block.get_data())
+                            for queue in self.block_update_queues:
+                                next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
+                                queue.put(next_block)
+                        else:
+                            print "Something went wrong. Could not add block to chain"
                     else:
-                        print "Something went wrong. Could not add block to chain"
-                else:
-                    print "Got a proposed new block but it did not verify"
+                        print "Got a proposed new block but it did not verify"
+        except Exception as e:
+            print str(e)
 
-    def request_block_chain_from_random_client(self, hash_id):
-        # TODO Caroline send request to a random client asking for blocks using the above hash_id as parameter
-        pass
+    def request_block_chain_from_random_client(self, parent_block_hash_id):
+        """
+        :param parent_block_hash_id: The hash id of the last block that should not be included.
+                                     Every block after should be sent
+        """
+
+        print "Sending requests for the latest blocks in the chain"
+        for stop_queue in self.stop_work_queues:
+            stop_queue.put(True)
+
+        # Pick the first client that is not us
+        for key, client in self.client_dict.items():
+            if key != self.client_id:
+                client_address = client[0]
+                msg = pickle.dumps((REQUEST_BLOCKS, parent_block_hash_id))
+                self.sock.sendto(msg, client_address)
+                return
 
 
 class calculationThread(threading.Thread):
-    def __init__(self, threadID, name, sock, block_without_nonce, client_name, block_update_queue, client_dict_lock,
+    def __init__(self, threadID,
+                 name,
+                 sock,
+                 block_without_nonce,
+                 client_name,
+                 block_update_queue,
+                 stop_work_queue,
+                 client_dict_lock,
                  client_dict):
         threading.Thread.__init__(self)
+        self.stop_work_queue = stop_work_queue  # If this queue is non-empty, stop work
         self.client_dict = client_dict
         self.client_dict_lock = client_dict_lock
         self.sock = sock
@@ -134,11 +179,17 @@ class calculationThread(threading.Thread):
                     # Check if somebody else already found the next block
                     someone_already_found_block = not self.block_update_queue.empty()
                     if not someone_already_found_block:
-                        print "Thread {0} found a nonce and thinks its the first one !".format(
-                            self.threadID)
+                        # print "Thread {0} found a nonce and thinks its the first one !".format(
+                        #     self.threadID)
+
+                        if not self.stop_work_queue.empty():
+                            print "O No ! The listener thread asked us to stop working. " \
+                                  "Lets not even try to broadcast the newly found block"
+                            break
+
                         # Broadcast the block
                         self.client_dict_lock.acquire()
-                        serialized_block = pickle.dumps(self.block)
+                        serialized_block = pickle.dumps((DISCOVERED_BLOCK,self.block))
 
                         for c in self.client_dict:
                             self.sock.sendto(serialized_block, self.client_dict[c][0])
@@ -151,6 +202,12 @@ class calculationThread(threading.Thread):
                                                                                                  self.client_name)
                         self.update_block()
                         continue
+
+            # if not self.stop_work_queue.empty():
+            #     print "Calculation thread was asked to stop working"
+
+            while not self.stop_work_queue.empty():
+                time.sleep(0.01)
             self.update_block()
 
     def update_block(self):
@@ -164,7 +221,7 @@ def create_next_block(block_chain, client_name):
     timestamp = int(time.time())
     data = client_name
     new_counter = prev_block.get_counter() + 1
-    hash_difficulty_value = 20
+    hash_difficulty_value = 10
     block = Block(prev_block.get_hash_value(), timestamp, data, new_counter, hash_difficulty_value)
 
     return block
@@ -191,22 +248,31 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     block_without_nonce2 = create_next_block(block_chain, client_name)
     block_without_nonce3 = create_next_block(block_chain, client_name)
 
-    queue1 = Queue.Queue()
-    queue2 = Queue.Queue()
-    queue3 = Queue.Queue()
+    block_update_queue1 = Queue.Queue()
+    block_update_queue2 = Queue.Queue()
+    block_update_queue3 = Queue.Queue()
 
-    listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name, [queue1, queue2, queue3],
+    stop_calculation_queue1 = Queue.Queue()
+    stop_calculation_queue2 = Queue.Queue()
+    stop_calculation_queue3 = Queue.Queue()
+
+    listen = listeningThread(ID, 0, "Listening_Thread", sock, block_chain, client_name,
+                             [block_update_queue1, block_update_queue2, block_update_queue3],
+                             [stop_calculation_queue1, stop_calculation_queue2, stop_calculation_queue3],
                              central_register_ip,
                              central_register_port,
                              client_dict_lock,
                              client_dict)
-    calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, queue1,
+    calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, block_update_queue1,
+                               stop_calculation_queue1,
                                client_dict_lock,
                                client_dict)
-    calc_2 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce2, client_name, queue2,
+    calc_2 = calculationThread(2, "Calculation_Thread", sock, block_without_nonce2, client_name, block_update_queue2,
+                               stop_calculation_queue2,
                                client_dict_lock,
                                client_dict)
-    calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, queue3,
+    calc_3 = calculationThread(3, "Calculation_Thread", sock, block_without_nonce3, client_name, block_update_queue3,
+                               stop_calculation_queue3,
                                client_dict_lock,
                                client_dict)
 
