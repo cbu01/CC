@@ -46,6 +46,8 @@ class listeningThread(threading.Thread):
 
     def run(self):
         try:
+            waiting_for_blocks_from_client = False
+
             while True:
                 # listen for new messages
                 data, addr = self.sock.recvfrom(4096)
@@ -85,7 +87,11 @@ class listeningThread(threading.Thread):
                     # Remove stop condition so calculation threads can restart their work
                     for stop_queue in self.stop_work_queues:
                         stop_queue.get()
+
+                    waiting_for_blocks_from_client = False
                 elif command == DISCOVERED_BLOCK:
+                    if waiting_for_blocks_from_client:
+                        continue
                     received_block = deserialized_data[1]
                     received_block_counter = received_block.get_counter()
                     target_block_counter = self.block_chain.get_target_block().get_counter()
@@ -105,6 +111,7 @@ class listeningThread(threading.Thread):
                         # Try to nuke the block chain and send the genesis hash
                         self.block_chain = BlockChain()
                         hash_id = self.block_chain.get_latest_safe_block_hash_id()
+                        waiting_for_blocks_from_client = True
                         self.request_block_chain_from_random_client(hash_id)
                         continue
 
@@ -214,7 +221,7 @@ def create_next_block(block_chain, client_name):
     timestamp = int(time.time())
     data = client_name
     new_counter = prev_block.get_counter() + 1
-    hash_difficulty_value = 12
+    hash_difficulty_value = 10
     block = Block(prev_block.get_hash_value(), timestamp, data, new_counter, hash_difficulty_value)
 
     return block
