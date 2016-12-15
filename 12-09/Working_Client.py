@@ -10,9 +10,15 @@ import Common
 import Queue
 import sys
 
+REQUEST_BLOCKS = "REQUEST_BLOCKS"
+DISCOVERED_BLOCK = "DISCOVERED_BLOCK"
+FINISHED_SENDING_REQUESTED_BLOCKS = "FINISHED_SENDING_REQUESTED_BLOCKS"
+INCOMING_BLOCK_FROM_OUR_REQUEST = "INCOMING_BLOCK_FROM_OUR_REQUEST"
+
 
 class listeningThread(threading.Thread):
     def __init__(self,
+                 client_id,
                  threadID,
                  name,
                  sock,
@@ -25,6 +31,7 @@ class listeningThread(threading.Thread):
                  client_dict_lock,
                  client_dict):
         threading.Thread.__init__(self)
+        self.client_id = client_id
         self.stop_work_queues = stop_work_queues
         self.client_dict = client_dict
         self.client_dict_lock = client_dict_lock
@@ -37,25 +44,14 @@ class listeningThread(threading.Thread):
         self.threadID = threadID
         self.name = name
 
-
-    # TODO Mannsi - Client needs to somehow try to get the initial version of the block chain when he starts (unless he is the only client of course)
+    # TODO will a new client fetch the block chain when it starts
     def run(self):
         while True:
             # listen for new messages
             data, addr = self.sock.recvfrom(4096)
             deserialized_data = pickle.loads(data)
 
-            # TODO these are just placeholders so that I can code the below if statements.
-            # These are the parameters that will be sent in the request_block_chain_from_random_client() function below
-            INCOMING_REQUEST_FOR_BLOCKS = False
-            HASH_ID_FROM_REQUEST = ""
-
-            # TODO again these are just placeholder parameters since I don't know how this will be sent exactly
-            # These are the parameters sent in the INCOMING_REQUEST_FOR_BLOCKS if block below
-            INCOMING_BLOCK_FROM_OUR_REQUEST = False
-            THE_BLOCK_SENT = None
-
-            FINISHED_SENDING_REQUESTED_BLOCKS = False
+            command = deserialized_data[0]
 
             if self.central_register_ip == addr[0] and self.central_register_port == addr[1]:
                 # New client
@@ -63,16 +59,20 @@ class listeningThread(threading.Thread):
                 self.client_dict_lock.acquire()
                 self.client_dict[deserialized_data[0]] = (deserialized_data[1], RSA.importKey(deserialized_data[2]))
                 self.client_dict_lock.release()
-            elif INCOMING_REQUEST_FOR_BLOCKS:
-                # Received request for blocks in our block chain
-                blocks_to_respond_with = self.block_chain.get_blocks_since_hash_id(HASH_ID_FROM_REQUEST)
+            elif command == REQUEST_BLOCKS:
+                hash_id_from_request = deserialized_data[1]
+                blocks_to_respond_with = self.block_chain.get_blocks_since_hash_id(hash_id_from_request)
                 for block in blocks_to_respond_with:
-                    # TODO Caroline send block to the client that sent this request to us
-                    pass
-                # TODO send to the same client that we are finished sending blocks
-            elif INCOMING_BLOCK_FROM_OUR_REQUEST:
-                self.block_chain.add_blocks_from_another_chain([THE_BLOCK_SENT])
-            elif FINISHED_SENDING_REQUESTED_BLOCKS:
+                    msg = pickle.dumps((INCOMING_BLOCK_FROM_OUR_REQUEST,block))
+                    self.sock.sendto(msg, addr)
+
+                # Send messages that we are done sending blocks
+                msg = pickle.dumps((FINISHED_SENDING_REQUESTED_BLOCKS, ""))
+                self.sock.sendto(msg, addr)
+            elif command == INCOMING_BLOCK_FROM_OUR_REQUEST:
+                sent_block = deserialized_data[1]
+                self.block_chain.add_blocks_from_another_chain([sent_block])
+            elif command == FINISHED_SENDING_REQUESTED_BLOCKS:
                 # New block for calculation threads
                 for queue in self.block_update_queues:
                     next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
@@ -81,11 +81,8 @@ class listeningThread(threading.Thread):
                 # Remove stop condition so calculation threads can restart their work
                 for stop_queue in self.stop_work_queues:
                     stop_queue.get()
-                pass
-            else:
-                # Received newly discovered block
-                received_block = deserialized_data
-
+            elif command == DISCOVERED_BLOCK:
+                received_block = deserialized_data[1]
                 received_block_counter = received_block.get_counter()
                 target_block_counter = self.block_chain.get_target_block().get_counter()
 
@@ -118,10 +115,21 @@ class listeningThread(threading.Thread):
                 else:
                     print "Got a proposed new block but it did not verify"
 
-    def request_block_chain_from_random_client(self, hash_id):
+    def request_block_chain_from_random_client(self, parent_block_hash_id):
+        """
+        :param parent_block_hash_id: The hash id of the last block that should not be included.
+                                     Every block after should be sent
+        """
         for stop_queue in self.stop_work_queues:
             stop_queue.put(True)
-        # TODO Caroline send request to a random client asking for blocks using the above hash_id as parameter
+
+        # Pick the first client that is not us
+        for key, client in self.client_dict.items():
+            if key != self.client_id:
+                client_address = client[0]
+                msg = pickle.dumps((REQUEST_BLOCKS, parent_block_hash_id))
+                self.sock.sendto(msg, client_address)
+                return
 
 
 class calculationThread(threading.Thread):
@@ -163,7 +171,7 @@ class calculationThread(threading.Thread):
 
                         # Broadcast the block
                         self.client_dict_lock.acquire()
-                        serialized_block = pickle.dumps(self.block)
+                        serialized_block = pickle.dumps((DISCOVERED_BLOCK,self.block))
 
                         for c in self.client_dict:
                             self.sock.sendto(serialized_block, self.client_dict[c][0])
@@ -230,7 +238,7 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     stop_calculation_queue2 = Queue.Queue()
     stop_calculation_queue3 = Queue.Queue()
 
-    listen = listeningThread(0, "Listening_Thread", sock, block_chain, client_name,
+    listen = listeningThread(ID, 0, "Listening_Thread", sock, block_chain, client_name,
                              [block_update_queue1, block_update_queue2, block_update_queue3],
                              [stop_calculation_queue1, stop_calculation_queue2, stop_calculation_queue3],
                              central_register_ip,
