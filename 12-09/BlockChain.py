@@ -3,7 +3,7 @@ from Block import Block
 
 class BlockChain:
     def __init__(self):
-        self.block_safety_offset = 3  # The number of blocks from the latest blocks that is considered 'safe'
+        self.block_safety_offset = 5  # The number of blocks from the latest blocks that is considered 'safe'
         self.latest_blocks = []
         self.blocks_dictionary = {}  # {BLockHashId: Block}
         self.genesis_block_hash = None
@@ -24,15 +24,6 @@ class BlockChain:
         return latest_current_block.get_hash_value()
 
     def add_block_to_latest_blocks(self, new_block):
-        # Remove blocks that the new block points to from latest blocks list
-        new_block_hash_pointer = new_block.get_previous_block_hash()
-        if new_block_hash_pointer in self.blocks_dictionary:
-            previous_block = self.blocks_dictionary[new_block_hash_pointer]
-            if previous_block in self.latest_blocks:
-                self.latest_blocks.remove(previous_block)
-        else:
-            raise Exception("Trying to add new block to latest blocks but it's not pointing to anything in the chain !")
-
         # Remove blocks that have a lower counter then new_counter - 1
         new_counter = new_block.get_counter()
         self.latest_blocks = [late_block for late_block in self.latest_blocks if late_block.get_counter() < new_counter - 1]
@@ -128,6 +119,9 @@ class BlockChain:
     def get_target_block(self):
         """ Returns a block that a client should be working to add to """
         return self.latest_blocks[0]
+
+    def get_target_blocks(self):
+        return self.latest_blocks
 
     def audit(self):
         current_block = self.latest_blocks[0]

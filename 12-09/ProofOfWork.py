@@ -22,19 +22,23 @@ def try_to_set_correct_nonce(block):
     return False
 
 
-# TODO
 def verify_next_block_in_chain(next_block, block_chain):
     block_hash_internal_verification = next_block.has_valid_hash_value()
     if not block_hash_internal_verification:
         print "Block does not verify internal hash"
         return False
 
-    current_latest_block = block_chain.get_target_block()
+    next_block_hash_pointer_matches = False
     previous_block_hash_val = next_block.get_previous_block_hash()
-    current_block_hash_val = current_latest_block.get_hash_value()
+    current_latest_blocks = block_chain.get_target_blocks()
+    for latest_block in current_latest_blocks:
+        latest_block_hash_value = latest_block.get_hash_value()
+        if previous_block_hash_val == latest_block_hash_value:
+            next_block_hash_pointer_matches = True
+            break
 
-    if previous_block_hash_val != current_block_hash_val:
-        print "Hash pointer of new block does not match hash value of previous block"
+    if not next_block_hash_pointer_matches:
+        print "Hash pointer of new block does not match hash value of previous blocks"
         return False
 
     return True
