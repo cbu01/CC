@@ -58,8 +58,14 @@ class listeningThread(threading.Thread):
     def run(self):
         try:
             waiting_for_blocks_from_client = False
+            start_time = int(time.time())
 
             while True:
+                # if int(time.time()) - start_time > 60:
+                #     # Just run for 5 minutes for this test
+                #     print "All fork records for client: " + str(self.block_chain.get_fork_record())
+                #     sys.exit()
+
                 # listen for new messages
                 data, addr = self.sock.recvfrom(4096)
                 deserialized_data = pickle.loads(data)
@@ -110,12 +116,7 @@ class listeningThread(threading.Thread):
                     received_block_counter = received_block.get_counter()
                     target_block_counter = self.block_chain.get_target_block().get_counter()
 
-                    block_has_too_low_counter = received_block_counter < target_block_counter
-                    if block_has_too_low_counter:
-                        print "We got an older block. Our latest block counter is {0} but the new blocks counter " \
-                              "is {1}. So we ignore it".format(target_block_counter, received_block_counter)
-                        continue
-
+                    # Too high counter and we want to get the block chain from somebody else
                     block_has_too_high_counter = received_block_counter > target_block_counter + 1
                     if block_has_too_high_counter:
                         print "Got a higher block counter than expected. Expected counter is {0} but we got {1}. " \
@@ -132,6 +133,18 @@ class listeningThread(threading.Thread):
                         self.request_block_chain_from_random_client(hash_id)
                         continue
 
+                    block_has_too_low_counter = received_block_counter < target_block_counter
+                    if block_has_too_low_counter:
+                        print "We got an older block. Our latest block counter is {0} but the new blocks counter " \
+                              "is {1}. So we ignore it".format(target_block_counter, received_block_counter)
+                        continue
+
+                    block_fits_not_latest_block = self.block_chain.block_fits_any_latest_block(received_block)
+                    if not block_fits_not_latest_block:
+                        print "Got a block with counter {0} that fits no latest block we have. " \
+                              "Maybe it is coming from another fork but we are not going to bother " \
+                              "with it since it's counter is not high enough".format(received_block_counter)
+
                     new_block_verified = ProofOfWork.verify_next_block_in_chain(received_block, self.block_chain)
                     if new_block_verified:
                         block_added = self.block_chain.add_block(received_block)
@@ -145,9 +158,9 @@ class listeningThread(threading.Thread):
                                 # If we are above that number we decrease the difficulty
                                 number_of_blocks = self.block_chain.get_number_of_blocks()
                                 if number_of_blocks > 2:
-                                    total_seconds_passed = last_block.get_time_stamp() - first_block.get_time_stamp()
-                                    first_block = self.block_chain.get_first_non_genesis_block()
                                     last_block = received_block
+                                    first_block = self.block_chain.get_first_non_genesis_block()
+                                    total_seconds_passed = last_block.get_time_stamp() - first_block.get_time_stamp()
 
                                     average_time_per_block = float(total_seconds_passed)/number_of_blocks
 
@@ -175,12 +188,12 @@ class listeningThread(threading.Thread):
                                 # We want every client to on average have as many blocks as everybody else
                                 num_clients = len(self.client_dict)
                                 if num_clients > 1:
-                                    num_blocks_in_chain = self.block_chain.get_number_of_blocks()
+                                    num_blocks_in_chain = self.block_chain.get_number_of_blocks() - 1
                                     num_block_from_me = self.block_chain.get_number_of_blocks_from_client(self.client_name)
                                     client_ratio = 1 / float(num_clients)
                                     client_block_ratio = num_block_from_me / float(num_blocks_in_chain)
 
-                                    if math.fabs(client_ratio - client_block_ratio) < 0.1:
+                                    if math.fabs(client_ratio - client_block_ratio)/client_ratio < 0.1:
                                         # If we are within 10% we do no change
                                         pass
                                     elif client_ratio > client_block_ratio:
@@ -335,11 +348,15 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     stop_calculation_queue2 = Queue.Queue()
     stop_calculation_queue3 = Queue.Queue()
 
-    minimum_hash_difficulty_level = 12
-    maximum_hash_difficulty_level = 24
+    minimum_hash_difficulty_level = 10
+    maximum_hash_difficulty_level = 23
 
     if hash_difficulty_level > maximum_hash_difficulty_level:
-        print "The max hash difficulty level is 24. This is for your own sanity (unless you really like waiting)"
+        print "The max hash difficulty level is {0}. This is for your own sanity (unless you really like waiting)".format(maximum_hash_difficulty_level)
+        return
+    if hash_difficulty_level < minimum_hash_difficulty_level:
+        print "The min hash difficulty level is {0}. Below is just way to fast".format(minimum_hash_difficulty_level)
+        return
 
     listen = listeningThread(ID, 0, "Listening_Thread", sock, block_chain, client_name,
                              [block_update_queue1, block_update_queue2, block_update_queue3],
