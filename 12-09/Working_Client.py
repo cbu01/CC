@@ -9,6 +9,7 @@ from Crypto.PublicKey import RSA
 import Common
 import Queue
 import sys
+import math
 
 REQUEST_BLOCKS = "REQUEST_BLOCKS"
 DISCOVERED_BLOCK = "DISCOVERED_BLOCK"
@@ -29,7 +30,9 @@ class listeningThread(threading.Thread):
                  central_register_ip,
                  central_register_port,
                  client_dict_lock,
-                 client_dict):
+                 client_dict,
+                 run_mode,
+                 run_mode_data):
         threading.Thread.__init__(self)
         self.client_id = client_id
         self.stop_work_queues = stop_work_queues
@@ -43,6 +46,10 @@ class listeningThread(threading.Thread):
         self.sock = sock
         self.threadID = threadID
         self.name = name
+
+        # 0 = normal[default], 1 = average_block_find_time, 2 = equal_num_blocks_per_client
+        self.run_mode = run_mode
+        self.run_mode_data = run_mode_data  # Used if run_mode is 1 for num seconds
 
     def run(self):
         try:
@@ -75,11 +82,14 @@ class listeningThread(threading.Thread):
                     print "Finished sending blocks to client"
                 elif command == INCOMING_BLOCK_FROM_OUR_REQUEST:
                     sent_block = deserialized_data[1]
+                    # print "Got block number {0} from the other client".format(sent_block.get_counter())
                     self.block_chain.add_blocks_from_another_chain([sent_block])
+                    # print "After adding my block chain has {0} blocks".format(self.block_chain.get_number_of_blocks())
                 elif command == FINISHED_SENDING_REQUESTED_BLOCKS:
                     # New block for calculation threads
                     current_latest_counter = self.block_chain.get_target_block().get_counter()
-                    print "Finished receiving blocks from other client. Current latest block chain counter is " + str(current_latest_counter)
+                    print "Finished receiving blocks from other client. Current latest block chain counter is " + str(
+                        current_latest_counter)
                     for queue in self.block_update_queues:
                         next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
                         queue.put(next_block)
@@ -98,18 +108,21 @@ class listeningThread(threading.Thread):
 
                     block_has_too_low_counter = received_block_counter < target_block_counter
                     if block_has_too_low_counter:
-                        print "We got an older block. Our latest block counter is {0} but the new blocks counter is {1}".\
-                            format(target_block_counter, received_block_counter)
+                        print "We got an older block. Our latest block counter is {0} but the new blocks counter " \
+                              "is {1}. So we ignore it".format(target_block_counter, received_block_counter)
                         continue
 
                     block_has_too_high_counter = received_block_counter > target_block_counter + 1
                     if block_has_too_high_counter:
                         print "Got a higher block counter than expected. Expected counter is {0} but we got {1}. " \
-                              "Maybe we are out of sync, so lets call some client and get his/her latest block chain".\
+                              "Maybe we are out of sync, so lets call some client and get his/her latest block chain". \
                             format(target_block_counter + 1, received_block_counter)
 
                         # Try to nuke the block chain and send the genesis hash
+                        # to collect a fresh block chain from another client
+                        previous_hash_difficulty_level = self.block_chain.get_hash_difficulty_level()
                         self.block_chain = BlockChain()
+                        self.block_chain.set_hash_difficulty_level(previous_hash_difficulty_level)
                         hash_id = self.block_chain.get_latest_safe_block_hash_id()
                         waiting_for_blocks_from_client = True
                         self.request_block_chain_from_random_client(hash_id)
@@ -121,6 +134,63 @@ class listeningThread(threading.Thread):
                         if block_added:
                             print "Block number {0} was added to the block chain by client '{1}'".format(
                                 str(received_block.get_counter()), received_block.get_data())
+
+                            if self.run_mode == 1:
+                                # We want the average number of seconds per block to be self.run_mode_data
+                                # If we are below that number we increase the difficulty
+                                # If we are above that number we decrease the difficulty
+                                number_of_blocks = self.block_chain.get_number_of_blocks()
+                                if number_of_blocks > 2:
+                                    first_block = self.block_chain.get_first_non_genesis_block()
+                                    last_block = received_block
+
+                                    total_seconds_passed = last_block.get_time_stamp() - first_block.get_time_stamp()
+                                    average_time_per_block = float(total_seconds_passed)/number_of_blocks
+
+                                    distance_from_time_target = average_time_per_block - self.run_mode_data
+                                    if math.fabs(distance_from_time_target) < 1:
+                                        # Lets not do anything if difference is within one sec
+                                        pass
+                                    elif average_time_per_block > self.run_mode_data:
+                                        # Decrease difficulty
+                                        current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
+                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty - 1)
+                                        print "This is too difficult (Average time between blocks is {0} sec). Lets decrease the hash difficulty from {1} to {2}"\
+                                            .format(int(average_time_per_block),current_hash_level_difficulty, current_hash_level_difficulty - 1)
+                                    else:
+                                        # Increase difficulty
+                                        current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
+                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty + 1)
+                                        print "This is too easy (Average time between blocks is {0} sec). Lets increase the hash difficulty from {1} to {2}" \
+                                            .format(int(average_time_per_block), current_hash_level_difficulty,
+                                                    current_hash_level_difficulty + 1)
+                            elif self.run_mode == 2:
+                                # We want every client to on average have as many blocks as everybody else
+                                num_clients = len(self.client_dict)
+                                if num_clients > 1:
+                                    num_blocks_in_chain = self.block_chain.get_number_of_blocks()
+                                    num_block_from_me = self.block_chain.get_number_of_blocks_from_client(self.client_name)
+                                    client_ratio = 1 / float(num_clients)
+                                    client_block_ratio = num_block_from_me / float(num_blocks_in_chain)
+
+                                    if math.fabs(client_ratio - client_block_ratio) < 0.05:
+                                        # If we are within 5% we do no change
+                                        pass
+                                    elif client_ratio > client_block_ratio:
+                                        # This is too hard for this client, he needs more blocks !
+                                        current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
+                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty - 1)
+                                        print "Client only has a {0:.2f} share of the blocks. Lets decrease its hash difficulty from {1} to {2}" \
+                                            .format(int(client_block_ratio), current_hash_level_difficulty,
+                                                    current_hash_level_difficulty - 1)
+                                    else:
+                                        # This is too easy for this client, he needs less blocks !
+                                        current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
+                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty + 1)
+                                        print "Client has a {0:.2f} share of the blocks. Lets increase its hash difficulty from {1} to {2}" \
+                                            .format(int(client_block_ratio), current_hash_level_difficulty,
+                                                    current_hash_level_difficulty + 1)
+
                             for queue in self.block_update_queues:
                                 next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
                                 queue.put(next_block)
@@ -189,7 +259,7 @@ class calculationThread(threading.Thread):
 
                         # Broadcast the block
                         self.client_dict_lock.acquire()
-                        serialized_block = pickle.dumps((DISCOVERED_BLOCK,self.block))
+                        serialized_block = pickle.dumps((DISCOVERED_BLOCK, self.block))
 
                         for c in self.client_dict:
                             self.sock.sendto(serialized_block, self.client_dict[c][0])
@@ -221,13 +291,13 @@ def create_next_block(block_chain, client_name):
     timestamp = int(time.time())
     data = client_name
     new_counter = prev_block.get_counter() + 1
-    hash_difficulty_value = 10
+    hash_difficulty_value = block_chain.get_hash_difficulty_level()
     block = Block(prev_block.get_hash_value(), timestamp, data, new_counter, hash_difficulty_value)
 
     return block
 
 
-def run(client_name, client_ip, client_port, central_register_ip, central_register_port):
+def run(client_name, client_ip, client_port, central_register_ip, central_register_port, hash_difficulty_level, run_mode, run_mode_data):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((client_ip, client_port))
 
@@ -244,6 +314,7 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     client_dict_lock = threading.Lock()
 
     block_chain = BlockChain()
+    block_chain.set_hash_difficulty_level(hash_difficulty_level)
     block_without_nonce1 = create_next_block(block_chain, client_name)
     block_without_nonce2 = create_next_block(block_chain, client_name)
     block_without_nonce3 = create_next_block(block_chain, client_name)
@@ -262,7 +333,8 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
                              central_register_ip,
                              central_register_port,
                              client_dict_lock,
-                             client_dict)
+                             client_dict,
+                             run_mode, run_mode_data)
     calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, block_update_queue1,
                                stop_calculation_queue1,
                                client_dict_lock,
@@ -287,7 +359,13 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     calc_2.start()
     calc_3.start()
 
-    print "Client {0} started".format(client_name)
+    run_mode_description = "Normal"
+    if run_mode == 1:
+        run_mode_description = "'Average time between blocks should be {0} seconds'".format(run_mode_data)
+    elif run_mode == 2:
+        run_mode_description = "'Every client should get equal amount of blocks'"
+
+    print "Client {0} started in {1} mode".format(client_name, run_mode_description)
 
     while True:
         time.sleep(1)
@@ -300,12 +378,23 @@ if __name__ == "__main__":
         client_port = int(sys.argv[3])
         central_register_ip = sys.argv[4]
         central_register_port = int(sys.argv[5])
-        run(client_name, client_ip, client_port, central_register_ip, central_register_port)
-    except:
-        message = """Usage: python Working_Client.py client_name client_ip client_port central_register_ip central_register_port
-         Example: python Working_Client.py AwesomeClient localhost 10500 localhost 10550
+        difficulty_level = int(sys.argv[6])
+        run_mode = 0
+        run_mode_data = 0
+        try:
+            run_mode = int(sys.argv[7])
+            if run_mode == 1:
+                run_mode_data = int(sys.argv[8])
+        except:
+            run_mode = 0
+            run_mode_data = 0
+        run(client_name, client_ip, client_port, central_register_ip, central_register_port, difficulty_level, run_mode, run_mode_data)
+    except Exception as e:
+        message = """Usage: python Working_Client.py client_name client_ip client_port central_register_ip central_register_port start_difficulty_level run_option_flag (0 = normal [default], 1 = average_block_find_time, 2 = equal_num_blocks_per_client)  run_option_seconds (only if run_option_flag == 1)
+         Example 1: python Working_Client.py AwesomeClient localhost 10500 localhost 10550 20
+         Example 2: python Working_Client.py AwesomeClient localhost 10500 localhost 10550 20 1 10
+         Example 3: python Working_Client.py AwesomeClient localhost 10500 localhost 10550 20 2
          """
 
         print message
         sys.exit()
-

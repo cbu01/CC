@@ -1,5 +1,6 @@
 import hashlib
 import ProofOfWork
+import time
 
 
 class Block:
@@ -15,6 +16,15 @@ class Block:
         self.counter = counter
         self.hash_difficulty_value = hash_difficulty_value
         self.nonce = None
+
+    def get_data(self):
+        return self.data
+
+    def get_time_stamp(self):
+        return self.timestamp
+
+    def update_timestamp(self):
+        self.timestamp = int(time.time())
 
     def set_nonce(self, nonce):
         self.nonce = nonce
