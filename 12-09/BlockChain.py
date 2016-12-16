@@ -16,6 +16,12 @@ class BlockChain:
         self.current_fork = None
         self._init_genesis_block()
 
+    def block_fits_any_latest_block(self, block):
+        for late_block in self.latest_blocks:
+            if late_block.get_hash_value() == block.get_previous_block_hash():
+                return True
+        return False
+
     def get_hash_difficulty_level(self):
         return self.hash_difficulty_level
 
