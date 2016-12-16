@@ -118,6 +118,17 @@ def combine(sharedsecrets, n, k, p=251):
         sum_collector = sum_collector + chr(sum % p)
     return sum_collector
 
+def prettyprint(output_of_get_shares):
+    n = output_of_get_shares[0]
+    k = output_of_get_shares[1]
+    p = output_of_get_shares[2]
+    shares = output_of_get_shares[3]
+    for i in range(len(shares)):
+        print " "
+        print "n = "+str(n)+", k = "+str(k)+", p = "+str(p)+", j = "+str(i)+","
+        print "secret: " + str(shares[i][1]) 
+        print " "    
+    print " " 
             
 """ convert a string into its binary representation
     @string: ascii string to convert
@@ -148,9 +159,13 @@ if __name__ == "__main__":
     print "Secret to hide: " + str(secret)
     
     # encrypt
-    sharedsecrets = get_shares(secret, n, k)[3]   
+    sharedsecrets = get_shares(secret, n, k)  
     print "The secret is divided into the following shares: "+ str(sharedsecrets) 
 
+    # print out the results with the pretty printer
+    print "Pretty Printer: "
+    prettyprint(sharedsecrets)
+
     # recover
-    joinedsecret = combine(sharedsecrets, n, k)
+    joinedsecret = combine(sharedsecrets[3], n, k)
     print "Restored secret: " + str(joinedsecret)
