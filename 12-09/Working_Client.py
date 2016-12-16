@@ -32,7 +32,9 @@ class listeningThread(threading.Thread):
                  client_dict_lock,
                  client_dict,
                  run_mode,
-                 run_mode_data):
+                 run_mode_data,
+                 minimum_hash_difficulty_level,
+                 maximum_hash_difficulty_level):
         threading.Thread.__init__(self)
         self.client_id = client_id
         self.stop_work_queues = stop_work_queues
@@ -46,6 +48,8 @@ class listeningThread(threading.Thread):
         self.sock = sock
         self.threadID = threadID
         self.name = name
+        self.minimum_hash_difficulty_level = minimum_hash_difficulty_level
+        self.maximum_hash_difficulty_level = maximum_hash_difficulty_level
 
         # 0 = normal[default], 1 = average_block_find_time, 2 = equal_num_blocks_per_client
         self.run_mode = run_mode
@@ -141,10 +145,10 @@ class listeningThread(threading.Thread):
                                 # If we are above that number we decrease the difficulty
                                 number_of_blocks = self.block_chain.get_number_of_blocks()
                                 if number_of_blocks > 2:
+                                    total_seconds_passed = last_block.get_time_stamp() - first_block.get_time_stamp()
                                     first_block = self.block_chain.get_first_non_genesis_block()
                                     last_block = received_block
 
-                                    total_seconds_passed = last_block.get_time_stamp() - first_block.get_time_stamp()
                                     average_time_per_block = float(total_seconds_passed)/number_of_blocks
 
                                     distance_from_time_target = average_time_per_block - self.run_mode_data
@@ -154,16 +158,19 @@ class listeningThread(threading.Thread):
                                     elif average_time_per_block > self.run_mode_data:
                                         # Decrease difficulty
                                         current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
-                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty - 1)
-                                        print "This is too difficult (Average time between blocks is {0} sec). Lets decrease the hash difficulty from {1} to {2}"\
-                                            .format(int(average_time_per_block),current_hash_level_difficulty, current_hash_level_difficulty - 1)
+
+                                        if current_hash_level_difficulty > self.minimum_hash_difficulty_level:
+                                            self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty - 1)
+                                            print "This is too difficult (Average time between blocks is {0} sec). Lets decrease the hash difficulty from {1} to {2}"\
+                                                .format(int(average_time_per_block),current_hash_level_difficulty, current_hash_level_difficulty - 1)
                                     else:
                                         # Increase difficulty
                                         current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
-                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty + 1)
-                                        print "This is too easy (Average time between blocks is {0} sec). Lets increase the hash difficulty from {1} to {2}" \
-                                            .format(int(average_time_per_block), current_hash_level_difficulty,
-                                                    current_hash_level_difficulty + 1)
+                                        if current_hash_level_difficulty < self.maximum_hash_difficulty_level:
+                                            self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty + 1)
+                                            print "This is too easy (Average time between blocks is {0} sec). Lets increase the hash difficulty from {1} to {2}" \
+                                                .format(int(average_time_per_block), current_hash_level_difficulty,
+                                                        current_hash_level_difficulty + 1)
                             elif self.run_mode == 2:
                                 # We want every client to on average have as many blocks as everybody else
                                 num_clients = len(self.client_dict)
@@ -173,23 +180,25 @@ class listeningThread(threading.Thread):
                                     client_ratio = 1 / float(num_clients)
                                     client_block_ratio = num_block_from_me / float(num_blocks_in_chain)
 
-                                    if math.fabs(client_ratio - client_block_ratio) < 0.05:
-                                        # If we are within 5% we do no change
+                                    if math.fabs(client_ratio - client_block_ratio) < 0.1:
+                                        # If we are within 10% we do no change
                                         pass
                                     elif client_ratio > client_block_ratio:
                                         # This is too hard for this client, he needs more blocks !
                                         current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
-                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty - 1)
-                                        print "Client only has a {0:.2f} share of the blocks. Lets decrease its hash difficulty from {1} to {2}" \
-                                            .format(int(client_block_ratio), current_hash_level_difficulty,
-                                                    current_hash_level_difficulty - 1)
+                                        if current_hash_level_difficulty > self.minimum_hash_difficulty_level:
+                                            self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty - 1)
+                                            print "Client only has a {0:.2f} share of the blocks ({3} client blocks). Lets decrease its hash difficulty from {1} to {2}" \
+                                                .format(client_block_ratio, current_hash_level_difficulty,
+                                                        current_hash_level_difficulty - 1, num_block_from_me)
                                     else:
                                         # This is too easy for this client, he needs less blocks !
                                         current_hash_level_difficulty = self.block_chain.get_hash_difficulty_level()
-                                        self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty + 1)
-                                        print "Client has a {0:.2f} share of the blocks. Lets increase its hash difficulty from {1} to {2}" \
-                                            .format(int(client_block_ratio), current_hash_level_difficulty,
-                                                    current_hash_level_difficulty + 1)
+                                        if current_hash_level_difficulty < self.maximum_hash_difficulty_level:
+                                            self.block_chain.set_hash_difficulty_level(current_hash_level_difficulty + 1)
+                                            print "Client has a {0:.2f} share of the blocks ({3} client blocks). Lets increase its hash difficulty from {1} to {2}" \
+                                                .format(client_block_ratio, current_hash_level_difficulty,
+                                                        current_hash_level_difficulty + 1, num_block_from_me)
 
                             for queue in self.block_update_queues:
                                 next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
@@ -268,8 +277,7 @@ class calculationThread(threading.Thread):
                         continue
                     else:
                         # Found a block but someone was faster :(
-                        print "Thread {0} from client {1} found a nonce but was too slow".format(self.threadID,
-                                                                                                 self.client_name)
+                        # print "Thread {0} from client {1} found a nonce but was too slow".format(self.threadID, self.client_name)
                         self.update_block()
                         continue
 
@@ -327,6 +335,12 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     stop_calculation_queue2 = Queue.Queue()
     stop_calculation_queue3 = Queue.Queue()
 
+    minimum_hash_difficulty_level = 12
+    maximum_hash_difficulty_level = 24
+
+    if hash_difficulty_level > maximum_hash_difficulty_level:
+        print "The max hash difficulty level is 24. This is for your own sanity (unless you really like waiting)"
+
     listen = listeningThread(ID, 0, "Listening_Thread", sock, block_chain, client_name,
                              [block_update_queue1, block_update_queue2, block_update_queue3],
                              [stop_calculation_queue1, stop_calculation_queue2, stop_calculation_queue3],
@@ -334,7 +348,7 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
                              central_register_port,
                              client_dict_lock,
                              client_dict,
-                             run_mode, run_mode_data)
+                             run_mode, run_mode_data, minimum_hash_difficulty_level, maximum_hash_difficulty_level)
     calc_1 = calculationThread(1, "Calculation_Thread", sock, block_without_nonce1, client_name, block_update_queue1,
                                stop_calculation_queue1,
                                client_dict_lock,
@@ -365,7 +379,7 @@ def run(client_name, client_ip, client_port, central_register_ip, central_regist
     elif run_mode == 2:
         run_mode_description = "'Every client should get equal amount of blocks'"
 
-    print "Client {0} started in {1} mode".format(client_name, run_mode_description)
+    print "Client {0} started in {1} mode with initial difficulty {2}".format(client_name, run_mode_description, hash_difficulty_level)
 
     while True:
         time.sleep(1)
