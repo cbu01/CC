@@ -13,10 +13,6 @@ Known issues:
 1. Difficulty levels were restricted to range 10-23. Above there is more than 30 min of waiting between blocks and below the speed is so great it creates a race condition where a client might neve receive a full block chain because he is constantly out of sync and while he fetches a new block chain from another client some other client has found too many blocks so that the newly fetched block chain is already outdated.
 2. In mode 'Equal blocks for clients', since we are dumping the entire block chain and restoring it when a client is out of sync it can happen that a new client enters that needs to start fetching a big block chain from a client. While that happens a 3rd client can continue mining and by the time the new client gets the block chain it might already be too old so the new client is stuck in a loop of trying to fetch a block chain.
 
-Graphs:
-We did not fully implement the graphs requested but we DID create a single graph showing number of forks per min for 2 and 3 clients and the max fork length for each difficulty leve.
-Here is the graph.
-
 Commands to run the code:
 Run the following commands from the folder '12-09' in source. They all assume 3 clients so just skip the last 1 or 2 lines if less clients are needed. Also note that the first command
 starts a central register where the clients register themselves and receive a list of all clients in respnse.
