@@ -25,6 +25,8 @@ def get_shares(secret, n, k, p=251):
     
     # turn message into binary format and add leading zeros to fill up whole bytes
     binary_secret = __turnToBin(str(secret))
+    # add salt to hide message length
+    binary_secret = __addSalt(binary_secret,p)
     
     # iterate over the message byte by byte and generate 6 secrets for each byte
     while len(binary_secret) > 0:
@@ -98,7 +100,7 @@ def combine(sharedsecrets, n, k, p=251):
     # get secret length as stopper for the loop
     length = len(int_secrets[0][1])   # get number of integers
       
-    sum_collector = ""   
+    sum_collector = [] # collect int values of characters in this list   
          
     for z in range(length): # for each integer/block (represents a char)    
         
@@ -114,10 +116,22 @@ def combine(sharedsecrets, n, k, p=251):
             dividend = (int_secrets[j][1][z] * dividend) % p
             divisor = gmpy2.invert((divisor % p), p)   
             sum = (sum + ((dividend * divisor) % p)) % p
-        # save encrypted char to list
-        sum_collector = sum_collector + chr(sum % p)
-    return sum_collector
+        # save decrypted integer to list
+        sum_collector.append(sum % p)
+        
+    # remove the salt
+    sum_collector = __removeSalt(sum_collector,p)
+    
+    # convert to string
+    result_string = ""
+    for s in sum_collector:
+        result_string += chr(s)
+    return result_string
 
+
+
+""" Print out all secrets in a pretty format.
+@output_of_get_shares: requires output of get_shares function """
 def prettyprint(output_of_get_shares):
     n = output_of_get_shares[0]
     k = output_of_get_shares[1]
@@ -129,6 +143,51 @@ def prettyprint(output_of_get_shares):
         print "secret: " + str(shares[i][1]) 
         print " "    
     print " " 
+  
+  
+""" Add a random number of bytes to a string in order hide the true message
+lenght. The first byte of the string indicates the number of random bytes, which 
+were added to the string. 
+@binaryString: message in binary format
+@p: prime
+@return: binary string with salt at its beginning """
+def __addSalt(binaryString,p):
+    
+    # select a random number of bytes, that should be added
+    # should smaller than p to ensure that there will be no problems with 
+    # the decyption
+    r = random.randint(5,(p-1))
+    r_bin = bin(r)[2:]
+    
+    # ensure that leading zeros don't get lost
+    while len(r_bin) < 8:
+        r_bin = '0' + r_bin
+        
+    # create r random bytes
+    salt = bin(int(random.getrandbits(r*8)))[2:]
+    
+    # ensure that leading zeros don't get lost
+    while (len(salt) % 8) != 0:
+        salt = '0' + salt
+    salted_string = r_bin+salt+binaryString
+    return salted_string
+
+
+
+""" Removes the random bytes from the beginning of a string. Since the 
+decrypion delivers the int value of each char, this removing function uses the
+list if ints as input. 
+@int_list: list of integers, each integer represents an ascii character
+@p: prime
+@return: integer list of characters from the message without the salt """
+def __removeSalt(int_list,p):
+    # determine how many random bytes follow
+    r = int_list[0]
+    # remove these random bytes from the list
+    unsalted_string = int_list[1+r:]
+    return unsalted_string
+    
+  
             
 """ convert a string into its binary representation
     @string: ascii string to convert
@@ -161,6 +220,8 @@ if __name__ == "__main__":
     # encrypt
     sharedsecrets = get_shares(secret, n, k)  
     print "The secret is divided into the following shares: "+ str(sharedsecrets) 
+    
+    print " "
 
     # print out the results with the pretty printer
     print "Pretty Printer: "
