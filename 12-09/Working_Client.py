@@ -58,13 +58,37 @@ class listeningThread(threading.Thread):
     def run(self):
         try:
             waiting_for_blocks_from_client = False
-            start_time = int(time.time())
+            # start_time = int(time.time())
 
             while True:
-                # if int(time.time()) - start_time > 60:
-                #     # Just run for 5 minutes for this test
-                #     print "All fork records for client: " + str(self.block_chain.get_fork_record())
-                #     sys.exit()
+                # Commented out code that was used to create forking data for graph
+
+                # if int(time.time()) - start_time > 600:
+                #     # Run for 10 minutes for this test
+                #     difficulty_level = self.block_chain.get_hash_difficulty_level()
+                #     print "All fork records for client {0} with difficulty level {1}: {2}".format(self.client_name, difficulty_level ,self.block_chain.get_fork_record())
+                #
+                #     for stop_queue in self.stop_work_queues:
+                #         stop_queue.put(True)
+                #
+                #     if difficulty_level >= self.maximum_hash_difficulty_level:
+                #         print "Done looping through all the difficulty levels"
+                #         print "Here are all the difficulty levels and ending block number for that level: " + str(self.block_chain.debug_list)
+                #         return
+                #
+                #     self.block_chain.debug_list.append((difficulty_level, self.block_chain.get_target_block().get_counter()))
+                #
+                #     self.block_chain.set_hash_difficulty_level(difficulty_level + 1)
+                #     time.sleep(5)  # sleep 5 seconds to make sure the other clients also manage to clear block chains
+                #
+                #     for queue in self.block_update_queues:
+                #         next_block = create_next_block(self.block_chain, "will_be_updated_by_client")
+                #         queue.put(next_block)
+                #
+                #     for stop_queue in self.stop_work_queues:
+                #         stop_queue.get()
+                #
+                #     start_time = int(time.time())
 
                 # listen for new messages
                 data, addr = self.sock.recvfrom(4096)
